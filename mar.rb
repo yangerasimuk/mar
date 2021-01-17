@@ -3,7 +3,7 @@ require 'io/console'
 
 USAGE = <<-ENDUSAGE
 Usage:
-	mar [-h] [-v] [-t] [-s] file
+	mar [-h] [-v] [-t] [-s] [-d] file
 
 ENDUSAGE
 
@@ -12,6 +12,7 @@ HELP = <<-ENDHELP
 	-v, --version	Show the version number.
 	-t, --tag		Mark with tags.
 	-s, --show		Show tags of file.
+	-d, --delete	Delete tags.
 
 ENDHELP
 
@@ -25,6 +26,7 @@ ARGV.each do |arg|
 		when '-v','--version'	then ARGS[:version]		= true
 		when '-t','--tag'		then ARGS[:tag]			= true
 		when '-s','--show'		then ARGS[:show]		= true
+		when '-d','--delete'	then ARGS[:delete]		= true
 	else
 		if next_arg
 			ARGS[next_arg] = arg
@@ -63,4 +65,16 @@ if ARGS[:show]
 		puts "		" + tag
 	end
 	exit
+end
+
+if ARGS[:delete]
+	puts "delete tags for file '" + ARGS[:file] + "'"
+	begin
+		f = File.open(ARGS[:file] + ".plain.mar", 'r')
+	ensure
+		if !f.nil? && File.exist?(f)
+			f.close unless f.closed?
+			File.delete(f)
+		end
+	end
 end
