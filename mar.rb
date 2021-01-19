@@ -287,7 +287,20 @@ class FileSystem
 	end
 
 	def files_in_dir(name)
-		Dir.entries(name)
+		file_names = Dir.entries(name)
+		if file_names.empty?
+			return Array.new()
+		else
+			valid_names = Array.new()
+			file_names.each do |name|
+				if !name.start_with? "."
+					if !name.end_with? ".plain.mar"
+						valid_names << name
+					end
+				end
+			end
+			return valid_names
+		end
 	end
 
 	def make_directory(name)
