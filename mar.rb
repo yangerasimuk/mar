@@ -293,9 +293,11 @@ class FileSystem
 		else
 			valid_names = Array.new()
 			file_names.each do |name|
-				if !name.start_with? "."
-					if !name.end_with? ".plain.mar"
-						valid_names << name
+				if !is_exists_directory?(name)
+					if !name.start_with? "."
+						if !name.end_with? ".plain.mar"
+							valid_names << name
+						end
 					end
 				end
 			end
