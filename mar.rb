@@ -1,4 +1,4 @@
-
+#!/usr/bin/env ruby
 
 USAGE = <<-ENDUSAGE
 Usage:
@@ -27,6 +27,9 @@ HELP = <<-ENDHELP
 	-ei, --erase-index	Erase all tags from files in index.
 
 ENDHELP
+
+# puts rray.map{ |i|  %Q('#{i}') }.join(',')
+puts ARGV.map{ |arg| '#{arg}' }.join('|')
 
 TAGS = []
 ARGS = { } # Setting default values
@@ -175,12 +178,12 @@ class MarIndex
 	def delete_file(name)
 		if is_exists_in_index_file(name)
 			file_names = file_names_in_index()
-			puts "#1"
+			put#s "#1"
 			file_names.each do |name|
 				puts "	" + name
 			end
 			file_names.delete(name)
-			puts "#2"
+			puts# "#2"
 			file_names.each do |name|
 				puts "	" + name
 			end
