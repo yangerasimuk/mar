@@ -1,7 +1,43 @@
-#!/usr/bin/env python3
-
 import argparse
+import os
 from version import __version__
+
+class FileSystem:
+	def isExistFile(self, path):
+		if os.path.isfile(path):
+			return True
+		else:
+			return False
+	
+	def isExistDirectory(self, path):
+		if os.path.isdir(path):
+			return True
+		else:
+			return False
+
+	def readLinesFile(self, path):
+		with open(path) as f:
+    			lines = [line.rstrip() for line in f]
+		return lines
+
+	def writeLinesFile(self, path, lines):
+		print("todo")
+
+	def removeFile(self, path):
+		os.remove(path)
+
+	def makeDirectory(self, path):
+		try:
+			os.mkdir(path)
+		except OSError:
+			print("Creation of the directory failed" & path)
+		
+	def currentDirectory(self):
+		return os.getcwd()
+
+def test():
+	fs = FileSystem()
+	print("current dir: ", fs.currentDirectory())
 
 def tag():
 	print("tag")
@@ -26,6 +62,8 @@ def main():
 		file()
 	elif args.command == "index":
 		index()
+	else:
+		test()
 
 if __name__ == "__main__":
 	main()
