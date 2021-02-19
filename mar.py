@@ -2,6 +2,15 @@ import argparse
 import sys
 import os
 
+class Version:
+	major = "0"
+	minor = "0"
+	patch = "3"
+	build = "Feb 19 2021"
+
+	def print(self):
+		print(f"Mar {self.major}.{self.minor}.{self.patch}, {self.build}")
+
 class FileSystem:
 	def isExistFile(self, path):
 		if os.path.isfile(path):
@@ -18,13 +27,13 @@ class FileSystem:
 	def readLinesFile(self, path):
 		lines = []
 		with open(path) as f:
-				lines = [line.rstrip() for line in f]
+			lines = [line.rstrip() for line in f]
 		return lines
 
 	def writeLinesFile(self, path, lines):
 		with open(path, "w") as f:
 			for line in lines:
-				f.write(line & "\n")
+				f.write(line + "\n")
 
 	def removeFile(self, path):
 		os.remove(path)
@@ -37,6 +46,23 @@ class FileSystem:
 		
 	def currentDirectory(self):
 		return os.getcwd()
+
+class Meta:
+	metaSuffix = ".plain.mar"
+
+	def __init__(self, fileName):
+		self.fileName = fileName
+		self.fileSystem = FileSystem()
+		self.metaFileName = fileName + self.metaSuffix
+		self.tags = []
+
+	def mark(self, tags):
+		self.tags = tags
+		self.syncTags()
+
+	def syncTags(self):
+		print("syncTags()")
+		self.fileSystem.writeLinesFile(self.metaFileName, self.tags)
 
 def test():
 	fs = FileSystem()
@@ -78,6 +104,9 @@ def tag(argv):
 	for tag in tags:
 		print("	", tag)
 
+	meta = Meta(file)
+	meta.mark(tags)
+
 def main():
 	'''
 	args = parse_args()
@@ -92,8 +121,10 @@ def main():
 		test()
 	'''
 	
+	'''
 	if len(sys.argv) < 3:
 		raise ValueError('Please, provide valid args')
+	'''
 
 	print("Args: ")
 	for arg in sys.argv:
@@ -104,14 +135,14 @@ def main():
 		tag(sys.argv)
 	elif firstArg == "index":
 		index()
+	elif firstArg == "version":
+		version = Version()
+		version.print()
 	else:
 		error()
 
 if __name__ == "__main__":
 	main()
-
-
-		
 
 def index():
 	print("index()")
