@@ -5,8 +5,8 @@ import os
 class Version:
 	major = "0"
 	minor = "0"
-	patch = "3"
-	build = "Feb 19 2021"
+	patch = "4"
+	build = "Feb 23 2021"
 
 	def fullVersion(self):
 		return "Mar {self.major}.{self.minor}.{self.patch}, {self.build}"
@@ -55,8 +55,8 @@ class Meta:
 
 	def __init__(self, fileName):
 		self.fileName = fileName
-		self.fileSystem = FileSystem()
 		self.metaFileName = fileName + self.metaSuffix
+		self.fileSystem = FileSystem()
 		self.syncTags()
 
 # Public API
@@ -67,10 +67,10 @@ class Meta:
 
 	def addTags(self, tags):
 		print("meta.addTags()")
-		self.tags + self.tags + tags
+		self.tags = self.tags + tags
 		self.writeTags()
 
-	def listTags(self)
+	def listTags(self):
 		print("meta.listTags()")
 		print("Tags")
 		for tag in self.tags:
@@ -84,11 +84,11 @@ class Meta:
 
 	def readTags(self):
 		print("meta.readTags()")
-		self.fileSystem.readLinesFile(self.metaFileName)
+		return self.fileSystem.readLinesFile(self.metaFileName)
 
 	def syncTags(self):
 		print("meta.syncTags()")
-		if self.fileSystem.isExistFile(self.metaFileName)
+		if self.fileSystem.isExistFile(self.metaFileName):
 			self.tags = self.readTags()
 		else:
 			self.tags = []
@@ -98,14 +98,6 @@ def test():
 	fs = FileSystem()
 	print("current dir: ", fs.currentDirectory())
 
-'''
-def tag():
-	print("tag")
-def file():
-	print("file")
-def index():
-	print("index")
-'''
 
 def parse_args():
 	parser = argparse.ArgumentParser()
@@ -121,31 +113,32 @@ def parse_args():
 
 def tag(argv):
 
-	file = argv[2]
+	option = argv[2]
+	print("Option: ", option)
+	file = argv[3]
 	print("File: ", file)
 
 	tags = []
-
-	option = argv[3]
-
 	counter = 4
 	while counter < len(argv):
 		tags.append(argv[counter])
 		counter = counter + 1
+	if len(tags) > 0:
+		print("Tags:")
+		for tag in tags:
+			print("	", tag)
+	else:
+		print("Tags: - ")
 
-	print("Tags:")
-	for tag in tags:
-		print("	", tag)
-
-	if option == "-s" or "--set":
+	if option == "-s" or option == "--set":
 		meta = Meta(file)
-		meta.set(tags)
-	elif option == "-a" or "--add"
+		meta.setTags(tags)
+	elif option == "-a" or option == "--add":
 		meta = Meta(file)
-		meta.add(tags)
-	elif option == "-l" or "--list"
+		meta.addTags(tags)
+	elif option == "-l" or option == "--list":
 		meta = Meta(file)
-		meta.listTags
+		meta.listTags()
 
 
 
@@ -189,4 +182,3 @@ if __name__ == "__main__":
 
 def index():
 	print("index()")
-
