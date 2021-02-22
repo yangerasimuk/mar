@@ -8,8 +8,11 @@ class Version:
 	patch = "3"
 	build = "Feb 19 2021"
 
-	def print(self):
-		print(f"Mar {self.major}.{self.minor}.{self.patch}, {self.build}")
+	def fullVersion(self):
+		return "Mar {self.major}.{self.minor}.{self.patch}, {self.build}"
+
+	def shortVersion(self):
+		return "Mar {self.major}.{self.minor}.{self.patch}"
 
 class FileSystem:
 	def isExistFile(self, path):
@@ -54,15 +57,42 @@ class Meta:
 		self.fileName = fileName
 		self.fileSystem = FileSystem()
 		self.metaFileName = fileName + self.metaSuffix
-		self.tags = []
-
-	def mark(self, tags):
-		self.tags = tags
 		self.syncTags()
 
-	def syncTags(self):
-		print("syncTags()")
+# Public API
+	def setTags(self, tags):
+		print("meta.setTags()")
+		self.tags = tags
+		self.writeTags()
+
+	def addTags(self, tags):
+		print("meta.addTags()")
+		self.tags + self.tags + tags
+		self.writeTags()
+
+	def listTags(self)
+		print("meta.listTags()")
+		print("Tags")
+		for tag in self.tags:
+			print("\t", tag)
+
+# Private
+
+	def writeTags(self):
+		print("meta.writeTags()")
 		self.fileSystem.writeLinesFile(self.metaFileName, self.tags)
+
+	def readTags(self):
+		print("meta.readTags()")
+		self.fileSystem.readLinesFile(self.metaFileName)
+
+	def syncTags(self):
+		print("meta.syncTags()")
+		if self.fileSystem.isExistFile(self.metaFileName)
+			self.tags = self.readTags()
+		else:
+			self.tags = []
+
 
 def test():
 	fs = FileSystem()
@@ -95,7 +125,10 @@ def tag(argv):
 	print("File: ", file)
 
 	tags = []
-	counter = 3
+
+	option = argv[3]
+
+	counter = 4
 	while counter < len(argv):
 		tags.append(argv[counter])
 		counter = counter + 1
@@ -104,8 +137,18 @@ def tag(argv):
 	for tag in tags:
 		print("	", tag)
 
-	meta = Meta(file)
-	meta.mark(tags)
+	if option == "-s" or "--set":
+		meta = Meta(file)
+		meta.set(tags)
+	elif option == "-a" or "--add"
+		meta = Meta(file)
+		meta.add(tags)
+	elif option == "-l" or "--list"
+		meta = Meta(file)
+		meta.listTags
+
+
+
 
 def main():
 	'''
