@@ -1,11 +1,21 @@
 import sys
 import os
 
+class Constant:
+	META_FILE_SUFFIX = ".mar.txt"
+	INDEX_DIRECTORY_NAME = "./.mar"
+	INDEX_FILE_NAME = "./.mar/index.mar.txt"
+	SYSTEM_FILE_PREFIX = "."
+	CURRENT_DIRECTORY_NAME = "."
+	PARENT_DIRECTORY_NAME = ".."
+
+	"./.mar/index.mar.txt"
+
 class Version:
 	major = "0"
 	minor = "0"
-	patch = "4"
-	build = "Feb 23 2021"
+	patch = "5"
+	build = "Feb 28 2021"
 
 	def fullVersion(self):
 		return "Mar v" + self.major + "." + self.minor + "." + self.patch + ", " + self.build
@@ -43,7 +53,11 @@ class FileSystem:
 				f.write(line + "\n")
 
 	def removeFile(self, path):
-		os.remove(path)
+		if self.isExistFile(path):
+			os.remove(path)
+			print("File removed")
+		else:
+			print("File not exists")
 
 	def makeDirectory(self, path):
 		try:
@@ -54,12 +68,51 @@ class FileSystem:
 	def currentDirectory(self):
 		return os.getcwd()
 
+
+class NameResolver:
+
+	def __init__(self, fileName):
+		self.fileSystem = FileSystem()
+		self.index = Index()
+		self.fileName = fileName
+
+	def names():
+		names = []
+		if self.fileName == ".":
+			print("nameResolver.names() with .")
+		elif self.fileName == "":
+			print("nameResolver.names() with index")
+		elif self.isValid(self.fileName):
+			return [self.fileName]
+		else:
+			return []
+
+	def isValid(self):
+		if len(self.fileName) == 0:
+			return False
+
+		if self.fileSystem.isExistDirectory(self.fileName):
+			return False
+
+		if self.fileName == Constant.CURRENT_DIRECTORY_NAME:
+			return False
+
+		if self.fileName == Constant.PARENT_DIRECTORY_NAME:
+			return False
+
+		if self.fileName.startswith(Constant.SYSTEM_FILE_PREFIX):
+			return False
+
+		if self.fileName.endswith(Constant.META_FILE_SUFFIX):
+			return False
+
+		return True
+
 class Meta:
-	metaSuffix = ".mar.txt"
 
 	def __init__(self, fileName):
 		self.fileName = fileName
-		self.metaFileName = fileName + self.metaSuffix
+		self.metaFileName = fileName + Constant.META_FILE_SUFFIX
 		self.fileSystem = FileSystem()
 		self.syncTags()
 
@@ -83,34 +136,36 @@ class Meta:
 				needSync = True
 				self.tags.remove(tag)
 
-		if needSync:
-			# print("needSync")
+		if needSync and len(self.tags) != 0:
 			self.writeTags()
-
-	def eraseTags(self):
-		# print("meta.eraseTags()")
-		if self.fileSystem.isExistFile(self.metaFileName):
+		elif len(self.tags) == 0:
 			self.fileSystem.removeFile(self.metaFileName)
 
-	def listTags(self):
-		# print("meta.listTags()")
-		# print("Tags")
-		for tag in self.tags:
-			print("\t", tag)
+	def eraseTags(self):
+		if self.fileSystem.isExistFile(self.metaFileName):
+			self.fileSystem.removeFile(self.metaFileName)
+			print("Meta file removed")
+		else:
+			print("Meta file not exists")
+
+	def printTags(self):
+		if len(self.tags) > 0:
+			print("Tags")
+			for tag in self.tags:
+				print("\t", tag)
+		else:
+			print("Tags not exists")
 
 	def metaFileSuffix(self):
-		return self.metaSuffix
+		return Constant.META_FILE_SUFFIX
 
 	def writeTags(self):
-		# print("meta.writeTags()")
 		self.fileSystem.writeLinesFile(self.metaFileName, self.tags)
 
 	def readTags(self):
-		# print("meta.readTags()")
 		return self.fileSystem.readLinesFile(self.metaFileName)
 
 	def syncTags(self):
-		# print("meta.syncTags()")
 		if self.fileSystem.isExistFile(self.metaFileName):
 			self.tags = self.readTags()
 		else:
@@ -120,10 +175,10 @@ class Meta:
 class Index:
 	indexDirectoryName = "./.mar"
 	indexFileName = "./.mar/index.mar.txt"
-	systemFilePrefix = "."
-	metaFileSuffix = ".mar.txt"
+	#systemFilePrefix = "."
+	#metaFileSuffix = ".mar.txt"
 
-	def __init__(self, fileName):
+	def __init__(self):
 		self.fileSystem = FileSystem()
 
 		if self.fileSystem.isExistDirectory(self.indexDirectoryName) == True:
@@ -145,16 +200,35 @@ class Index:
 			f.write(name + "\n")
 			f.close()
 		else:
-			print("file not in index")
+			print("File exists in index yet")
+
+	def addFolder(self):
+		elements = os.listdir()
+		validFiles = []
+
+		print("index.addFolder()")
+		print("elements before:")
+		for el in elements:
+			print("\t" + el)
+			resolver = NameResolver(el)
+			if resolver.isValid():
+				validFiles.append(el)
+
+		print("elements after:")
+		for file in validFiles:
+			print("\t" + file)
+			self.addFile(file)
 
 	def listFiles(self):
 		return self.fileNamesInIndex
 
 	def printFiles(self):
 		if len(self.fileNamesInIndex) > 0:
-			print("Files in index:")
+			print("File(s) in index:")
 			for name in self.fileNamesInIndex:
 				print("\t" + name)
+		else:
+			print("Index is empty")
 
 	def deleteFile(self, name):
 		# print("index.deleteFile()")
@@ -166,7 +240,7 @@ class Index:
 			else:
 				self.fileSystem.removeFile(self.indexFileName)
 		else:
-			print("file not in index")
+			print("File not exists in index")
 
 	def eraseIndex(self):
 		# print("index.eraseIndex()")
@@ -186,38 +260,78 @@ class Index:
 		else:
 			print("index directory exists yet")
 
-class NameResolver:
-
-	def __init__(self, fileName):
-		self.fileSystem = FileSystem()
-		self.index = Index(fileName)
-		self.fileName = fileName
-
-	def names():
-		names = []
-		if self.fileName == ".":
-			print("nameResolver.names() with .")
-		elif self.fileName == "":
-			print("nameResolver.names() with index")
-		elif self.isValid(self.fileName):
-			return [self.fileName]
+	def isExistIndex(self):
+		if self.fileSystem.isExistFile(self.indexFileName):
+			return True
 		else:
-			return []
+			return False
 
-	def isValid(self):
-		if len(self.fileName) == 0:
-			return NO
+class MetaIndex:
 
-		if self.fileName == "." or self.fileName == "..":
-			return NO
+	def __init__(self):
+		self.index = Index()
 
-		if self.fileSystem.isExistDirectory(self.fileName):
-			return NO
+	def setTags(self, tags):
+		print("metaIndex.setTags()")
+		if not self.index.isExistIndex():
+			print("Index not exists")
+			return
 
-		if self.fileName.endswith(self.fileSystem.metaFileSuffix):
-			return NO
+		for fileName in self.index.listFiles():
+			meta = Meta(fileName)
+			meta.setTags(tags)
 
-		return YES
+	def addTags(self, tags):
+		print("metaIndex.addTags()")
+		if not self.index.isExistIndex():
+			print("Index not exists")
+			return
+
+		for fileName in self.index.listFiles():
+			meta = Meta(fileName)
+			meta.addTags(tags)
+
+	def deleteTags(self, tags):
+		print("metaIndex.deleteTags()")
+		if not self.index.isExistIndex():
+			print("Index not exists")
+			return
+
+		for fileName in self.index.listFiles():
+			meta = Meta(fileName)
+			meta.deleteTags(tags)
+
+	def eraseTags(self):
+		print("metaIndex.eraseTags()")
+		if not self.index.isExistIndex():
+			print("Index not exists")
+			return
+
+		for fileName in self.index.listFiles():
+			meta = Meta(fileName)
+			meta.eraseTags()
+
+def tagIndex(argv):
+	option = argv[2]
+	print("Option: ", option)
+
+	print("Tags: ")
+	tags = []
+	counter = 3
+	while counter < len(argv):
+		print("\t", argv[counter])
+		tags.append(argv[counter])
+		counter = counter + 1
+
+	metaIndex = MetaIndex()
+	if option == "-s" or option == "--set":
+		metaIndex.setTags(tags)
+	elif option == "-a" or option == "--add":
+		metaIndex.addTags(tags)
+	elif option == "-d" or option == "--delete":
+		metaIndex.deleteTags(tags)
+	elif option == "-e" or option == "--erase":
+		metaIndex.eraseTags()
 
 def tag(argv):
 
@@ -250,13 +364,8 @@ def tag(argv):
 		meta.deleteTags(tags)
 	elif option == "-e" or option == "--erase":
 		meta.eraseTags()
-	elif option == "-l" or option == "--list":
-		meta.listTags()
-
-	'''
 	elif option == "-p" or option == "--print":
-		meta.listTags()
-	'''
+		meta.printTags()
 
 def index(argv):
 
@@ -267,11 +376,13 @@ def index(argv):
 		file = argv[3]
 	# print("File: ", file)
 
-	index = Index(file)
+	index = Index()
 	if option == "-s" or option == "--set":
 		index.setFile(file)
 	elif option == "-a" or option == "--add":
 		index.addFile(file)
+	elif option == "-f" or option == "--add-folder":
+		index.addFolder()
 	elif option == "-d" or option == "--delete":
 		index.deleteFile(file)
 	elif option == "-e" or option == "--erase":
@@ -282,14 +393,11 @@ def index(argv):
 		index.printFiles()
 
 def main():
-	'''
-	print("Args: ")
-	for arg in sys.argv:
-		print("	", arg)
-	'''
 	firstArg = sys.argv[1]
 	if firstArg == "tag":
 		tag(sys.argv)
+	elif firstArg == "tag-index":
+		tagIndex(sys.argv)
 	elif firstArg == "index":
 		index(sys.argv)
 	elif firstArg == "version":
