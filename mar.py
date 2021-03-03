@@ -9,13 +9,13 @@ class Constant:
 	CURRENT_DIRECTORY_NAME = "."
 	PARENT_DIRECTORY_NAME = ".."
 
-	"./.mar/index.mar.txt"
+	# "./.mar/index.mar.txt"
 
 class Version:
 	major = "0"
 	minor = "0"
-	patch = "5"
-	build = "Feb 28 2021"
+	patch = "6"
+	build = "Mar 3, 2021"
 
 	def fullVersion(self):
 		return "Mar v" + self.major + "." + self.minor + "." + self.patch + ", " + self.build
@@ -311,6 +311,43 @@ class MetaIndex:
 			meta = Meta(fileName)
 			meta.eraseTags()
 
+class Folder:
+
+	def __init__(self):
+		self.index = Index()
+
+	def list(self):
+		print("folder.list()")
+		files = self.files()
+		counter = 0
+		for file in files:
+			print(counter, "\t", file)
+			counter = counter + 1
+
+	def addFilesWithIndexes(self, fileIndexes):
+		print("folder.addFilesWithIndexes()")
+		files = self.files()
+		print("count of files ", len(files))
+		counter = 0
+		for file in files:
+			counterStr = str(counter)
+			if counterStr in fileIndexes:
+				print(counterStr, "\t", file)
+				self.index.addFile(file)
+			counter = counter + 1
+
+	# Private
+
+	def files(self):
+		rawFiles = os.listdir()
+		sortedFiles = sorted(rawFiles)
+		validFiles = []
+		for file in sortedFiles:
+			nameResolver = NameResolver(file)
+			if nameResolver.isValid():
+				validFiles.append(file)
+		return validFiles
+
 def tagIndex(argv):
 	option = argv[2]
 	print("Option: ", option)
@@ -392,6 +429,27 @@ def index(argv):
 	elif option == "-p" or option == "--print":
 		index.printFiles()
 
+def folder(argv):
+	print("folder()")
+
+	option = argv[2]
+	print("Option: ", option)
+
+	indexes = []
+	counter = 3
+	while counter < len(argv):
+		index = argv[counter]
+		# nameResolver = NameResolver()
+		indexes.append(index)
+		counter = counter + 1
+
+	folder = Folder()
+	if option == "-l" or option == "--list":
+		folder.list()
+	elif option == "-a" or option == "--add":
+		folder.addFilesWithIndexes(indexes)
+
+
 def main():
 	firstArg = sys.argv[1]
 	if firstArg == "tag":
@@ -403,6 +461,8 @@ def main():
 	elif firstArg == "version":
 		version = Version()
 		version.print()
+	elif firstArg == "folder":
+		folder(sys.argv)
 	else:
 		error()
 
