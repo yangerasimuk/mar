@@ -1,5 +1,6 @@
 import sys
 import os
+from typing import List
 
 class Constant:
 	META_FILE_SUFFIX = ".mar.txt"
@@ -8,14 +9,14 @@ class Constant:
 	SYSTEM_FILE_PREFIX = "."
 	CURRENT_DIRECTORY_NAME = "."
 	PARENT_DIRECTORY_NAME = ".."
-
-	# "./.mar/index.mar.txt"
+	SYSTEM_DIRECTORY_PREFIX = "."
+	PYTHON_DIRECTORY_PREFIX = "_"
 
 class Version:
 	major = "0"
 	minor = "0"
-	patch = "6"
-	build = "Mar 3, 2021"
+	patch = "9"
+	build = "Mar 8, 2021"
 
 	def fullVersion(self):
 		return "Mar v" + self.major + "." + self.minor + "." + self.patch + ", " + self.build
@@ -23,8 +24,50 @@ class Version:
 	def shortVersion(self):
 		return "Mar v" + self.major + "." + self.minor + "." + self.patch
 
-	def print(self):
-		print(self.fullVersion())
+class Color:
+	# https://stackoverflow.com/questions/287871/how-to-print-colored-text-to-the-terminal
+	RED = '\033[31m'
+	GREEN = '\033[32m'
+	YELLOW = '\033[33m'
+	BLUE = '\033[34m'
+	PURPLE = '\033[35m'
+	ENDCOLOR = '\033[0m'
+
+	def fileNameInIndex(self):
+		return self.YELLOW
+	
+	def fileAddedToIndex(self):
+		return self.GREEN
+
+	def fileRemovedFromIndex(self):
+		return self.RED
+
+# class Directory:
+
+# 	def __init__(self, name = None, baseDirectory: Directory = None):
+# 		if name is None and baseDirectory is None:
+# 			currentDirectory = FileSystem.currentDirectory()
+# 			self.name = currentDirectory.name()
+# 			self.baseDirectory = currentDirectory.baseDirectory()
+# 		elif directory is None:
+# 			self.name = name
+# 			currentDirectory = FileSystem.currentDirectory()
+# 			self.baseDirectory = currentDirectory
+# 		else:
+# 			self.name = name
+# 			self.baseDirectory = baseDirectory
+
+# 		self.fullPath = self.baseDirectory.fullPath + "/" + self.name
+
+# class File:
+
+# 	def __init__(self, name, directory: Directory = None):
+# 		self.name = name
+# 		if directory is None:
+# 			self.directory = FileSystem().currentDirectory()
+# 		else:
+# 			self.directory = directory
+# 		self.fullPath = self.directory.fullPath + "/" + self.name
 
 class FileSystem:
 	def isExistFile(self, path):
@@ -34,8 +77,6 @@ class FileSystem:
 			return False
 	
 	def isExistDirectory(self, path):
-		# print("fileSystem.isExistDirectory()")
-		# print("\t" + path)
 		if os.path.isdir(path):
 			return True
 		else:
@@ -64,9 +105,6 @@ class FileSystem:
 			os.mkdir(path)
 		except OSError:
 			print("Creation of the directory failed" & path)
-		
-	def currentDirectory(self):
-		return os.getcwd()
 
 
 class NameResolver:
@@ -106,6 +144,12 @@ class NameResolver:
 		if self.fileName.endswith(Constant.META_FILE_SUFFIX):
 			return False
 
+		if os.path.islink(self.fileName):
+			return False
+		
+		if os.path.ismount(self.fileName):
+			return False
+
 		return True
 
 class Meta:
@@ -116,20 +160,15 @@ class Meta:
 		self.fileSystem = FileSystem()
 		self.syncTags()
 
-# Public API
-
 	def setTags(self, tags):
-		# print("meta.setTags()")
 		self.tags = tags
 		self.writeTags()
 
 	def addTags(self, tags):
-		# print("meta.addTags()")
 		self.tags = self.tags + tags
 		self.writeTags()
 
 	def deleteTags(self, tags):
-		# print("meta.deleteTags()")
 		needSync = None
 		for tag in tags:
 			if tag in self.tags:
@@ -144,17 +183,17 @@ class Meta:
 	def eraseTags(self):
 		if self.fileSystem.isExistFile(self.metaFileName):
 			self.fileSystem.removeFile(self.metaFileName)
-			print("Meta file removed")
+			print("Meta file removed.")
 		else:
-			print("Meta file not exists")
+			print("Meta file not exists.")
 
 	def printTags(self):
 		if len(self.tags) > 0:
-			print("Tags")
+			print("Tags:")
 			for tag in self.tags:
 				print("\t", tag)
 		else:
-			print("Tags not exists")
+			print("Tags not exists.")
 
 	def metaFileSuffix(self):
 		return Constant.META_FILE_SUFFIX
@@ -173,7 +212,6 @@ class Meta:
 
 
 class Index:
-	indexDirectoryName = "./.mar"
 	indexFileName = "./.mar/index.mar.txt"
 	#systemFilePrefix = "."
 	#metaFileSuffix = ".mar.txt"
@@ -181,7 +219,7 @@ class Index:
 	def __init__(self):
 		self.fileSystem = FileSystem()
 
-		if self.fileSystem.isExistDirectory(self.indexDirectoryName) == True:
+		if self.fileSystem.isExistDirectory(Constant.INDEX_DIRECTORY_NAME) == True:
 			self.fileNamesInIndex = self.readIndex()
 		else:
 			self.fileNamesInIndex = []
@@ -190,13 +228,13 @@ class Index:
 	def setFile(self, name):
 		# print("index.setFile()")
 		self.fileNamesInIndex = [name]
-		self.fileSystem.writeLinesFile(self.indexFileName, self.fileNamesInIndex)
+		self.fileSystem.writeLinesFile(Constant.INDEX_FILE_NAME, self.fileNamesInIndex)
 
 	def addFile(self, name):
 		# print("index.addFile()")
 		if name not in self.fileNamesInIndex:
 			# print(name + " not in index")
-			f = open(self.indexFileName, "a+")
+			f = open(Constant.INDEX_FILE_NAME, "a+")
 			f.write(name + "\n")
 			f.close()
 		else:
@@ -231,37 +269,32 @@ class Index:
 			print("Index is empty")
 
 	def deleteFile(self, name):
-		# print("index.deleteFile()")
 		if name in self.fileNamesInIndex:
 			self.fileNamesInIndex.remove(name)
-
-			if len(self.indexFileName) > 0:
-				self.fileSystem.writeLinesFile(self.indexFileName, self.fileNamesInIndex)
+			if self.fileNamesInIndex.count > 0:
+				self.fileSystem.writeLinesFile(Constant.INDEX_FILE_NAME, self.fileNamesInIndex)
 			else:
-				self.fileSystem.removeFile(self.indexFileName)
+				self.fileSystem.removeFile(Constant.INDEX_FILE_NAME)
 		else:
 			print("File not exists in index")
 
 	def eraseIndex(self):
-		# print("index.eraseIndex()")
-		self.fileSystem.removeFile(self.indexFileName)
+		self.fileSystem.removeFile(Constant.INDEX_FILE_NAME)
 
 	def readIndex(self):
-		if self.fileSystem.isExistFile(self.indexFileName) == True:
-			return self.fileSystem.readLinesFile(self.indexFileName)
+		if self.fileSystem.isExistFile(Constant.INDEX_FILE_NAME) == True:
+			return self.fileSystem.readLinesFile(Constant.INDEX_FILE_NAME)
 		else:
 			return []
 
 	def checkIndexDirectory(self):
-		# print("index.checkIndexDirectory()")
-		if self.fileSystem.isExistDirectory(self.indexDirectoryName) == False:
-			# print("make index directory")
-			self.fileSystem.makeDirectory(self.indexDirectoryName)
+		if self.fileSystem.isExistDirectory(Constant.INDEX_DIRECTORY_NAME) == False:
+			self.fileSystem.makeDirectory(Constant.INDEX_DIRECTORY_NAME)
 		else:
-			print("index directory exists yet")
+			print("Index directory exists yet.")
 
 	def isExistIndex(self):
-		if self.fileSystem.isExistFile(self.indexFileName):
+		if self.fileSystem.isExistFile(Constant.INDEX_FILE_NAME):
 			return True
 		else:
 			return False
@@ -272,9 +305,8 @@ class MetaIndex:
 		self.index = Index()
 
 	def setTags(self, tags):
-		print("metaIndex.setTags()")
 		if not self.index.isExistIndex():
-			print("Index not exists")
+			print("Index not exists.")
 			return
 
 		for fileName in self.index.listFiles():
@@ -282,9 +314,8 @@ class MetaIndex:
 			meta.setTags(tags)
 
 	def addTags(self, tags):
-		print("metaIndex.addTags()")
 		if not self.index.isExistIndex():
-			print("Index not exists")
+			print("Index not exists.")
 			return
 
 		for fileName in self.index.listFiles():
@@ -292,9 +323,8 @@ class MetaIndex:
 			meta.addTags(tags)
 
 	def deleteTags(self, tags):
-		print("metaIndex.deleteTags()")
 		if not self.index.isExistIndex():
-			print("Index not exists")
+			print("Index not exists.")
 			return
 
 		for fileName in self.index.listFiles():
@@ -302,9 +332,8 @@ class MetaIndex:
 			meta.deleteTags(tags)
 
 	def eraseTags(self):
-		print("metaIndex.eraseTags()")
 		if not self.index.isExistIndex():
-			print("Index not exists")
+			print("Index not exists.")
 			return
 
 		for fileName in self.index.listFiles():
@@ -316,24 +345,47 @@ class Folder:
 	def __init__(self):
 		self.index = Index()
 
-	def list(self):
-		print("folder.list()")
+	def print(self):
 		files = self.files()
 		counter = 0
 		for file in files:
-			print(counter, "\t", file)
+			if file in self.index.fileNamesInIndex:
+				print(Color().fileNameInIndex() + str(counter) + "\t" + file + Color.ENDCOLOR)
+			else:
+				print(str(counter) + "\t" + file)
 			counter = counter + 1
 
 	def addFilesWithIndexes(self, fileIndexes):
-		print("folder.addFilesWithIndexes()")
+		if len(fileIndexes) == 0:
+			print("Index(es) not passed.")
+			return
+
 		files = self.files()
-		print("count of files ", len(files))
 		counter = 0
 		for file in files:
 			counterStr = str(counter)
 			if counterStr in fileIndexes:
-				print(counterStr, "\t", file)
+				print(Color().fileAddedToIndex() + str(counterStr) + "\t" + file + Color.ENDCOLOR)
 				self.index.addFile(file)
+			counter = counter + 1
+
+	def removeFilesWithIndexes(self, fileIndexes):
+		files = self.files()
+		counter = 0
+		for file in files:
+			counterStr = str(counter)
+			if counterStr in fileIndexes:
+				print(Color().fileRemovedFromIndex() + str(counterStr) + "\t" + file + Color.ENDCOLOR)
+				self.index.deleteFile(file)
+			counter = counter + 1
+	
+	def openFileWithIndex(self, index):
+		files = self.files()
+		counter = 0
+		for file in files:
+			counterStr = str(counter)
+			if index == counterStr:
+				os.system("open " + file)
 			counter = counter + 1
 
 	# Private
@@ -350,9 +402,9 @@ class Folder:
 
 def tagIndex(argv):
 	option = argv[2]
-	print("Option: ", option)
+	# print("Option: ", option)
 
-	print("Tags: ")
+	# print("Tags: ")
 	tags = []
 	counter = 3
 	while counter < len(argv):
@@ -382,14 +434,6 @@ def tag(argv):
 	while counter < len(argv):
 		tags.append(argv[counter])
 		counter = counter + 1
-	'''
-	if len(tags) > 0:
-		print("Tags:")
-		for tag in tags:
-			print("	", tag)
-	else:
-		print("Tags: - ")
-	'''
 
 	meta = Meta(file)
 
@@ -430,10 +474,8 @@ def index(argv):
 		index.printFiles()
 
 def folder(argv):
-	print("folder()")
-
 	option = argv[2]
-	print("Option: ", option)
+	# print("Option: ", option)
 
 	indexes = []
 	counter = 3
@@ -444,11 +486,14 @@ def folder(argv):
 		counter = counter + 1
 
 	folder = Folder()
-	if option == "-l" or option == "--list":
-		folder.list()
+	if option == "-p" or option == "--print":
+		folder.print()
 	elif option == "-a" or option == "--add":
 		folder.addFilesWithIndexes(indexes)
-
+	elif option == "-d" or option == "--delete":
+		folder.removeFilesWithIndexes(indexes)
+	elif option == "-o" or option == "--open":
+		folder.openFileWithIndex(index)
 
 def main():
 	firstArg = sys.argv[1]
