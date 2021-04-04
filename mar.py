@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import sys
 import os
 from typing import List
@@ -15,14 +17,30 @@ class Constant:
 class Version:
 	major = "0"
 	minor = "0"
-	patch = "9"
-	build = "Mar 8, 2021"
+	patch = "10"
+	build = "April 4, 2021"
+	author = "Yan Gerasimuk"
 
 	def fullVersion(self):
-		return "Mar v" + self.major + "." + self.minor + "." + self.patch + ", " + self.build
+		return "v" + self.major + "." + self.minor + "." + self.patch + " (" + self.build + ")"
 
 	def shortVersion(self):
-		return "Mar v" + self.major + "." + self.minor + "." + self.patch
+		return "v" + self.major + "." + self.minor + "." + self.patch
+
+	def print(self):
+		print("mar " + self.fullVersion() + ", " + self.author)
+
+class Helper:
+
+	def print(self):
+		print("\tРабота с тегами одного файла")
+		print("\tmar.py tag [sadep] FILE [tag...]")
+		print("\tmar.py tag --set text.txt firstTag secondTag")
+		print("\t\t" + "-s или --set Установить теги")
+		print("\t\t" + "-a или --add Добавить теги")
+		print("\t\t" + "-d или --delete Удалить теги")
+		print("\t\t" + "-e или --erase Удалить все теги (файл с тегами")
+		print("\t\t" + "-p или --print Напечатать теги файла")
 
 class Color:
 	# https://stackoverflow.com/questions/287871/how-to-print-colored-text-to-the-terminal
@@ -96,9 +114,9 @@ class FileSystem:
 	def removeFile(self, path):
 		if self.isExistFile(path):
 			os.remove(path)
-			print("File removed")
+			print("File '" + path + "' removed")
 		else:
-			print("File not exists")
+			print("File '" + path + "' not exists.")
 
 	def makeDirectory(self, path):
 		try:
@@ -496,6 +514,10 @@ def folder(argv):
 		folder.openFileWithIndex(index)
 
 def main():
+	if len(sys.argv) == 1:
+		helper = Helper()
+		helper.print()
+		exit()
 	firstArg = sys.argv[1]
 	if firstArg == "tag":
 		tag(sys.argv)
@@ -508,6 +530,9 @@ def main():
 		version.print()
 	elif firstArg == "folder":
 		folder(sys.argv)
+	elif firstArg == "help":
+		helper = Helper()
+		helper.print()
 	else:
 		error()
 
