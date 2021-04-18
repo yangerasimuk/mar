@@ -513,6 +513,25 @@ def folder(argv):
 	elif option == "-o" or option == "--open":
 		folder.openFileWithIndex(index)
 
+def listTag(argv):
+	# mar.py list --add someTag
+
+	tags = []
+
+	if len(argv) > 2:
+		option = argv[2]
+		print("Option: ", option)
+		counter = 3
+		while counter < len(argv):
+			tag = argv[counter]
+			tags.append(tag)
+			counter = counter + 1
+			print("\t" + tag)
+	elif len(argv) == 2:
+		print("List of current tags")
+
+	assert False, "Объект lister не реализован"
+
 def main():
 	if len(sys.argv) == 1:
 		helper = Helper()
@@ -533,6 +552,8 @@ def main():
 	elif firstArg == "help":
 		helper = Helper()
 		helper.print()
+	elif firstArg == "list":
+		listTag(sys.argv)
 	else:
 		error()
 
