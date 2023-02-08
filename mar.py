@@ -24,7 +24,7 @@ class Constant:
 class Version:
 	major = "0"
 	minor = "1"
-	patch = "0"
+	patch = "1"
 	build = "Febrary 8, 2023"
 	author = "Yan Gerasimuk"
 
