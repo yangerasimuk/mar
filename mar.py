@@ -2,10 +2,17 @@
 
 import sys
 import os
+import hashlib
 from typing import List
+from file_system import *
+from finder import *
 
 class Constant:
 	META_FILE_SUFFIX = ".mar.txt"
+	MAR_DIRECTORY_NAME = "./.mar"
+	TAGS_PATH_FILE_NAME = "./.mar/tags.path.mar.txt"
+
+	# Поменять на MAR_DIRECTORY_NAME
 	INDEX_DIRECTORY_NAME = "./.mar"
 	INDEX_FILE_NAME = "./.mar/index.mar.txt"
 	SYSTEM_FILE_PREFIX = "."
@@ -16,9 +23,9 @@ class Constant:
 
 class Version:
 	major = "0"
-	minor = "0"
-	patch = "10"
-	build = "April 4, 2021"
+	minor = "1"
+	patch = "0"
+	build = "Febrary 8, 2023"
 	author = "Yan Gerasimuk"
 
 	def fullVersion(self):
@@ -59,6 +66,28 @@ class Color:
 
 	def fileRemovedFromIndex(self):
 		return self.RED
+
+class Directory:
+	def __init__(self, name = None, rootPathAbs = None):
+		currentDir = os.curdir
+		absCurrentDir = os.path.abspath(currentDir)
+		print(absCurrentDir)
+
+		if name is None and rootPathAbs is None:
+			currentDir = os.curdir
+			absCurrentDir = os.path.abspath(currentDir)
+			print(absCurrentDir)
+		elif rootPathAbs is None:
+			self.name = "/"
+		else:
+			self.name = name
+			self.rootPathAbs = rootPathAbs
+	
+	def fullPath(self):
+		if self.rootPathAbs is None:
+			return self.name
+		else:
+			return self.rootPathAbs + "/" + self.name
 
 # class Directory:
 
@@ -124,6 +153,12 @@ class FileSystem:
 		except OSError:
 			print("Creation of the directory failed" & path)
 
+	def checkDirectory(self, path):
+		if self.isExistDirectory(path) == False:
+			self.makeDirectory(path)
+
+#	def currentDir(self):
+		
 
 class NameResolver:
 
@@ -169,6 +204,15 @@ class NameResolver:
 			return False
 
 		return True
+
+	def hasMeta(self):
+		metaFileName = self.fileName + Constant.META_FILE_SUFFIX
+		if self.fileSystem.isExistFile(metaFileName) == True:
+			return True
+		else:
+			return False
+		
+
 
 class Meta:
 
@@ -373,6 +417,16 @@ class Folder:
 				print(str(counter) + "\t" + file)
 			counter = counter + 1
 
+	def printHash(self):
+		files = self.files()
+		for file in files:
+			fileHashRaw = file.encode('utf-8')
+			fileHash = hashlib.sha1(fileHashRaw).hexdigest()
+			if file in self.index.fileNamesInIndex:
+				print(Color().fileNameInIndex() + fileHash + "\t" + file + Color.ENDCOLOR)
+			else:
+				print(fileHash + "\t" + file)
+
 	def addFilesWithIndexes(self, fileIndexes):
 		if len(fileIndexes) == 0:
 			print("Index(es) not passed.")
@@ -418,6 +472,171 @@ class Folder:
 				validFiles.append(file)
 		return validFiles
 
+
+class Lister:
+
+	def __init__(self):
+		self.fileSystem = FileSystem()
+		if self.fileSystem.isExistDirectory(Constant.MAR_DIRECTORY_NAME) == True:
+			self.tagsInPath = self.readTagsPath()
+		else:
+			self.tagsInPath = []
+			self.fileSystem.checkDirectory(Constant.MAR_DIRECTORY_NAME)
+
+	def addTags(self, tags):
+		for tag in tags:
+			if (tag in self.tagsInPath) == False:
+				self.tagsInPath.append(tag)
+				f = open(Constant.TAGS_PATH_FILE_NAME, "a+")
+				f.write(tag + "\n")
+				f.close()
+
+	def deleteTags(self, tags):
+		needSync = False
+		for tag in tags:
+			if (tag in self.tagsInPath) == True:
+				self.tagsInPath.remove(tag)
+				needSync = True
+
+		if needSync == True:
+			self.fileSystem.writeLinesFile(Constant.TAGS_PATH_FILE_NAME, self.tagsInPath)
+
+
+	def printTagsInPath(self):
+		if len(self.tagsInPath) > 0:
+			print("Tags in path:")
+			for tag in self.tagsInPath:
+				print("\t" + tag)
+		else:
+			print("Path is not consists any tag")
+
+	def printFiles(self):
+		self.printTagsInPath()
+		rawFiles = os.listdir()
+		sortedFiles = sorted(rawFiles)
+		maredFiles = []
+		for file in sortedFiles:
+			nameResolver = NameResolver(file)
+			if nameResolver.isValid() and nameResolver.hasMeta():
+				maredFiles.append(file)
+
+		matchedFiles = []
+		for file in maredFiles:
+			meta = Meta(file)
+			tags = meta.readTags()
+			isMatch = False
+			for tag in self.tagsInPath:
+				if (tag in tags):
+					isMatch = True
+				else:
+					isMatch = False
+					break
+
+			if isMatch == True:
+				matchedFiles.append(file)
+
+		if len(matchedFiles) > 0:
+			innerTags = []
+			print("Files for path:")
+			for file in matchedFiles:
+				print("\t" + file)
+				meta = Meta(file)
+				#innerTags.extend(meta.tags)
+				for tag in meta.tags:
+					if not (tag in innerTags):
+						innerTags.append(tag)
+			if len(innerTags) > 0:
+				sortedInnerTags = sorted(innerTags)
+				print("InnerTags: ")
+				for tag1 in sortedInnerTags:
+					print("\t" + tag1)
+		else:
+			print("Nothing matches for path tags")
+
+
+
+	def printFilesRecursive(self):
+
+		self.printTagsInPath()
+		rawFiles = os.listdir()
+		sortedFiles = sorted(rawFiles)
+		maredFiles = []
+		for file in sortedFiles:
+			nameResolver = NameResolver(file)
+			if nameResolver.isValid() and nameResolver.hasMeta():
+				maredFiles.append(file)
+
+		matchedFiles = []
+		for file in maredFiles:
+			meta = Meta(file)
+			tags = meta.readTags()
+			isMatch = False
+			for tag in self.tagsInPath:
+				if (tag in tags):
+					isMatch = True
+				else:
+					isMatch = False
+					break
+
+			if isMatch == True:
+				matchedFiles.append(file)
+
+		if len(matchedFiles) > 0:
+			innerTags = []
+			print("Files for path:")
+			for file in matchedFiles:
+				print("\t" + file)
+				meta = Meta(file)
+				#innerTags.extend(meta.tags)
+				for tag in meta.tags:
+					if not (tag in innerTags):
+						innerTags.append(tag)
+			if len(innerTags) > 0:
+				sortedInnerTags = sorted(innerTags)
+				print("InnerTags: ")
+				for tag1 in sortedInnerTags:
+					print("\t" + tag1)
+		else:
+			print("Nothing matches for path tags")
+
+
+	def printAllTags(self):
+		print("lister.printAllTags()")
+		rawFiles = os.listdir()
+		sortedFiles = sorted(rawFiles)
+		maredFiles = []
+		for file in sortedFiles:
+			nameResolver = NameResolver(file)
+			if nameResolver.isValid() and nameResolver.hasMeta():
+				maredFiles.append(file)
+			
+		allTags = []
+		for file in maredFiles:
+			meta = Meta(file)
+			tags = meta.readTags()
+			for tag in tags:
+				if (tag in allTags) == False:
+					allTags.append(tag)
+		sortedAllTags = sorted(allTags)
+
+		if len(sortedAllTags) > 0:
+			print("All tags of directory:")
+			for tag in sortedAllTags:
+				print("\t" + tag)
+		else:
+			print("Files in directory have not any tags")
+
+	def eraseTags(self):
+		if self.fileSystem.isExistFile(Constant.TAGS_PATH_FILE_NAME) == True:
+			self.fileSystem.deleteFile(Constant.TAGS_PATH_FILE_NAME)
+
+	def readTagsPath(self):
+		if self.fileSystem.isExistFile(Constant.TAGS_PATH_FILE_NAME) == True:
+			return self.fileSystem.readLinesFile(Constant.TAGS_PATH_FILE_NAME)
+		else:
+			return []
+	
+
 def tagIndex(argv):
 	option = argv[2]
 	# print("Option: ", option)
@@ -443,9 +662,9 @@ def tagIndex(argv):
 def tag(argv):
 
 	option = argv[2]
-	# print("Option: ", option)
+	print("Option: ", option)
 	file = argv[3]
-	# print("File: ", file)
+	print("File: ", file)
 
 	tags = []
 	counter = 4
@@ -465,6 +684,30 @@ def tag(argv):
 		meta.eraseTags()
 	elif option == "-p" or option == "--print":
 		meta.printTags()
+
+def tagList(argv):
+	print("tagList()")
+
+	for arg in argv:
+		print(arg)
+
+	fs = YgFileSystem()
+	fs.cur_folder()
+	#fs.fast_scandir(os.curdir)
+	curdir = os.path.abspath(os.curdir)
+	folder = YgFolder(curdir)
+
+	print("#1")
+	folders = fs.folders(folder, False)
+	for item in folders:
+		item.print()
+		
+	print("#2")
+	folders2 = fs.folders(folder)
+	for item in folders2:
+		item.print()
+
+
 
 def index(argv):
 
@@ -512,6 +755,8 @@ def folder(argv):
 		folder.removeFilesWithIndexes(indexes)
 	elif option == "-o" or option == "--open":
 		folder.openFileWithIndex(index)
+	elif option == "-h" or option == "--hash":
+		folder.printHash()
 
 def listTag(argv):
 	# mar.py list --add someTag
@@ -530,7 +775,70 @@ def listTag(argv):
 	elif len(argv) == 2:
 		print("List of current tags")
 
-	assert False, "Объект lister не реализован"
+	#assert False, "Объект lister не реализован"
+	lister = Lister()
+	if option == "-a" or option == "--add":
+		lister.addTags(tags)
+	elif option == "-d" or option == "--delete":
+		lister.deleteTags(tags)
+	elif option == "-p" or option == "--print":
+		lister.printTagsInPath()
+	elif option == "-f" or option == "--files":
+		lister.printFiles()
+	elif option == "-t" or option == "--tags":
+		lister.printAllTags()
+	elif option == "-e" or option == "--erase":
+		lister.eraseTags()
+	elif option == "-r" or option == "--files-recursive":
+		lister.printFilesRecurcive()
+
+def fast_scandir(dirname):
+	subfolders= [f.path for f in os.scandir(dirname) if f.is_dir()]
+	for dirname in list(subfolders):
+		subfolders.extend(fast_scandir(dirname))
+	return subfolders
+
+def finder(argv):
+	print("finder(argv)")
+	for arg in argv:
+		print(arg)
+
+	option = argv[2]
+	keys = []
+
+	if len(argv) > 2:
+		option = argv[2]
+		print("Option: ", option)
+		counter = 3
+		while counter < len(argv):
+			key = argv[counter]
+			keys.append(key)
+			counter = counter + 1
+	
+	filesystem = YgFileSystem()
+	finder = YgFinder(filesystem)
+
+	if option == "-p" or option == "--print":
+		finder.print()
+	elif option == "-r" or option == "--print-recursive":
+		finder.printRecursive()
+	elif option == "-a" or option == "--add":
+		finder.addTags(keys)
+	elif option == "-d" or option == "--delete":
+		finder.deleteTags(keys)
+	elif option == "-e" or option == "--erase":
+		finder.eraseTags()
+	elif option == "-g" or option == "--goto":
+		hash = keys.pop()
+		finder.goToFolder(hash)
+	elif option == "-o" or option == "--open":
+		hash = keys.pop()
+		finder.openFile(hash)
+
+def error(argv):
+	print("Command line is not correct")
+	for arg in argv:
+		print(arg)
 
 def main():
 	if len(sys.argv) == 1:
@@ -554,8 +862,13 @@ def main():
 		helper.print()
 	elif firstArg == "list":
 		listTag(sys.argv)
+	elif firstArg == "finder":
+		finder(sys.argv)
+	elif firstArg == "tag-list":
+		tagList(sys.argv)
 	else:
-		error()
+		error(sys.argv)
 
+# Точка входа	
 if __name__ == "__main__":
 	main()
