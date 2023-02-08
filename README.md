@@ -11,7 +11,7 @@ IMG_0001.JPG
 IMG_0001.JPG.mar.txt
 ```
 ## Предусловие
-Наличие интерпретатора python.
+Наличие интерпретатора python3.
 
 ## Установка
 Разместить файл в одной из папок с правами на исполнение.
@@ -63,4 +63,19 @@ alias marFolderAdd="python3 ~/bin/mar.py folder -a"
 alias marFolderDelete="python3 ~/bin/mar.py folder -d"
 # Открыть файл с номером
 alias marFolderOpen="python3 ~/bin/mar.py folder -o"
+
+# Напечатать список текущих файлов и тегов
+alias marFinderPrint="python3 ~/bin/mar.py finder -p"
+# Напечатать список текущих файлов и тегов рекурсивно
+alias marFinderPrintR="python3 ~/bin/mar.py finder -r"
+# Добавить тег в текущий список
+alias marFinderAdd="python3 ~/bin/mar.py finder -a"
+# Удалить тег из текущего списка
+alias marFinderDelete="python3 ~/bin/mar.py finder -d"
+# Удалить список текущих тегов
+alias marFinderErase="python3 ~/bin/mar.py finder -e"
+# Перейти в папку файла с хешем
+alias marFinderGo="python3 ~/bin/mar.py finder -g"
+# Открыть файл с хешем
+alias marFinderOpen="python3 ~/bin/mar.py finder -o"
 ```
