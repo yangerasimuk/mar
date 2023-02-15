@@ -24,8 +24,8 @@ class Constant:
 class Version:
 	major = "0"
 	minor = "1"
-	patch = "1"
-	build = "Febrary 8, 2023"
+	patch = "2"
+	build = "Febrary 15, 2023"
 	author = "Yan Gerasimuk"
 
 	def fullVersion(self):
@@ -35,7 +35,12 @@ class Version:
 		return "v" + self.major + "." + self.minor + "." + self.patch
 
 	def print(self):
-		print("mar " + self.fullVersion() + ", " + self.author)
+		print("mar " + self.fullVersion() + ", (c) " + self.author)
+
+class Environment:
+	def print(self):
+		print(sys.version)
+
 
 class Helper:
 
@@ -855,6 +860,9 @@ def main():
 	elif firstArg == "version":
 		version = Version()
 		version.print()
+	elif firstArg == "environment":
+		env = Environment()
+		env.print()
 	elif firstArg == "folder":
 		folder(sys.argv)
 	elif firstArg == "help":
