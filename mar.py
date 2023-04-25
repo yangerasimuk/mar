@@ -3,6 +3,10 @@
 import sys
 import os
 import hashlib
+import pathlib
+
+from pathlib import Path
+
 from typing import List
 from file_system import *
 from finder import *
@@ -20,12 +24,13 @@ class Constant:
 	PARENT_DIRECTORY_NAME = ".."
 	SYSTEM_DIRECTORY_PREFIX = "."
 	PYTHON_DIRECTORY_PREFIX = "_"
+	SYSTEM_FILES = [".DS_Store", ".localized"]
 
 class Version:
 	major = "0"
 	minor = "1"
-	patch = "2"
-	build = "Febrary 15, 2023"
+	patch = "3"
+	build = "April 25, 2023"
 	author = "Yan Gerasimuk"
 
 	def fullVersion(self):
@@ -40,7 +45,6 @@ class Version:
 class Environment:
 	def print(self):
 		print(sys.version)
-
 
 class Helper:
 
@@ -65,7 +69,7 @@ class Color:
 
 	def fileNameInIndex(self):
 		return self.YELLOW
-	
+
 	def fileAddedToIndex(self):
 		return self.GREEN
 
@@ -87,47 +91,20 @@ class Directory:
 		else:
 			self.name = name
 			self.rootPathAbs = rootPathAbs
-	
+
 	def fullPath(self):
 		if self.rootPathAbs is None:
 			return self.name
 		else:
 			return self.rootPathAbs + "/" + self.name
 
-# class Directory:
-
-# 	def __init__(self, name = None, baseDirectory: Directory = None):
-# 		if name is None and baseDirectory is None:
-# 			currentDirectory = FileSystem.currentDirectory()
-# 			self.name = currentDirectory.name()
-# 			self.baseDirectory = currentDirectory.baseDirectory()
-# 		elif directory is None:
-# 			self.name = name
-# 			currentDirectory = FileSystem.currentDirectory()
-# 			self.baseDirectory = currentDirectory
-# 		else:
-# 			self.name = name
-# 			self.baseDirectory = baseDirectory
-
-# 		self.fullPath = self.baseDirectory.fullPath + "/" + self.name
-
-# class File:
-
-# 	def __init__(self, name, directory: Directory = None):
-# 		self.name = name
-# 		if directory is None:
-# 			self.directory = FileSystem().currentDirectory()
-# 		else:
-# 			self.directory = directory
-# 		self.fullPath = self.directory.fullPath + "/" + self.name
-
 class FileSystem:
-	def isExistFile(self, path):
-		if os.path.isfile(path):
+	def isExistFile(self, fileName):
+		if os.path.isfile(fileName):
 			return True
 		else:
 			return False
-	
+
 	def isExistDirectory(self, path):
 		if os.path.isdir(path):
 			return True
@@ -162,9 +139,6 @@ class FileSystem:
 		if self.isExistDirectory(path) == False:
 			self.makeDirectory(path)
 
-#	def currentDir(self):
-		
-
 class NameResolver:
 
 	def __init__(self, fileName):
@@ -184,30 +158,40 @@ class NameResolver:
 			return []
 
 	def isValid(self):
+		# print("isValid()")
 		if len(self.fileName) == 0:
+			# print("nonValid - null name")
 			return False
 
-		if self.fileSystem.isExistDirectory(self.fileName):
-			return False
+		# Warning! Не срабатывает для кейса finder'а
+		#if self.fileSystem.isExistDirectory(self.fileName):
+		#	return False
 
 		if self.fileName == Constant.CURRENT_DIRECTORY_NAME:
+			# print("nonValid - current directory name")
 			return False
 
 		if self.fileName == Constant.PARENT_DIRECTORY_NAME:
+			# print("nonValid - parent directory name")
 			return False
 
 		if self.fileName.startswith(Constant.SYSTEM_FILE_PREFIX):
+			# print("nonValid - startswith(prefix)")
 			return False
 
 		if self.fileName.endswith(Constant.META_FILE_SUFFIX):
+			# print("nonValid - endswith(suffix)")
 			return False
 
 		if os.path.islink(self.fileName):
-			return False
-		
+			print("nonValid - islink")
+			# return False
+
 		if os.path.ismount(self.fileName):
+			# print("nonValid - ismount")
 			return False
 
+		# print("File is valid!")
 		return True
 
 	def hasMeta(self):
@@ -216,8 +200,6 @@ class NameResolver:
 			return True
 		else:
 			return False
-		
-
 
 class Meta:
 
@@ -280,8 +262,6 @@ class Meta:
 
 class Index:
 	indexFileName = "./.mar/index.mar.txt"
-	#systemFilePrefix = "."
-	#metaFileSuffix = ".mar.txt"
 
 	def __init__(self):
 		self.fileSystem = FileSystem()
@@ -455,7 +435,7 @@ class Folder:
 				print(Color().fileRemovedFromIndex() + str(counterStr) + "\t" + file + Color.ENDCOLOR)
 				self.index.deleteFile(file)
 			counter = counter + 1
-	
+
 	def openFileWithIndex(self, index):
 		files = self.files()
 		counter = 0
@@ -614,7 +594,7 @@ class Lister:
 			nameResolver = NameResolver(file)
 			if nameResolver.isValid() and nameResolver.hasMeta():
 				maredFiles.append(file)
-			
+
 		allTags = []
 		for file in maredFiles:
 			meta = Meta(file)
@@ -640,7 +620,7 @@ class Lister:
 			return self.fileSystem.readLinesFile(Constant.TAGS_PATH_FILE_NAME)
 		else:
 			return []
-	
+
 
 def tagIndex(argv):
 	option = argv[2]
@@ -706,7 +686,7 @@ def tagList(argv):
 	folders = fs.folders(folder, False)
 	for item in folders:
 		item.print()
-		
+
 	print("#2")
 	folders2 = fs.folders(folder)
 	for item in folders2:
@@ -819,7 +799,7 @@ def finder(argv):
 			key = argv[counter]
 			keys.append(key)
 			counter = counter + 1
-	
+
 	filesystem = YgFileSystem()
 	finder = YgFinder(filesystem)
 
@@ -877,6 +857,6 @@ def main():
 	else:
 		error(sys.argv)
 
-# Точка входа	
+# Точка входа
 if __name__ == "__main__":
 	main()
