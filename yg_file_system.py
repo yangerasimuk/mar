@@ -1,5 +1,6 @@
 import os
 
+
 class YgFolder:
 	def __init__(self, fullpath):
 		self.fullpath = fullpath
@@ -7,6 +8,7 @@ class YgFolder:
 
 	def print(self):
 		print(self.fullpath)
+
 
 class YgFileSystem:
 
@@ -18,11 +20,12 @@ class YgFileSystem:
 
 	def cur_folder(self):
 		cur_dir = os.curdir
-		print(type(cur_dir))
-		print("cur_dir: " + cur_dir)
-		print("os.path.dirname():" + os.path.dirname(cur_dir))
-		print("os.path.abspath(): " + os.path.abspath(cur_dir))
-		return YgFolder(cur_dir)
+		# print(type(cur_dir))
+		# print("cur_dir: " + cur_dir)
+		# print("os.path.dirname():" + os.path.dirname(cur_dir))
+		# print("os.path.abspath(): " + os.path.abspath(cur_dir))
+		# return YgFolder(cur_dir)
+		return YgFolder(os.path.abspath(cur_dir))
 
 	def fast_scandir(self, dirname):
 		subfolders= [f.path for f in os.scandir(dirname) if f.is_dir()]
