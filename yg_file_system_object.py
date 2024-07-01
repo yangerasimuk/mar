@@ -27,6 +27,13 @@ class YgFileSystemObject:
     def isFile(self):
         return os.path.isfile(self.fullName())
 
+    def is_mar_ignore(self) -> bool:
+        # .marignore определен только для папок
+        if not self.isDir():
+            return False
+        return os.path.isfile(os.path.join(self.path, Constant.MAR_IGNORE_FILE_NAME))
+
+
     def hasFiles(self):
         if self.isFile():
             return False
