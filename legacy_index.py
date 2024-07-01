@@ -62,7 +62,7 @@ class LegacyIndex:
     def deleteFile(self, name):
         if name in self.fileNamesInIndex:
             self.fileNamesInIndex.remove(name)
-            if self.fileNamesInIndex.count > 0:
+            if len(self.fileNamesInIndex) > 0:
                 self.fileSystem.writeLinesFile(Constant.INDEX_FILE_NAME, self.fileNamesInIndex)
             else:
                 self.fileSystem.removeFile(Constant.INDEX_FILE_NAME)

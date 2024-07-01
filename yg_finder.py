@@ -59,7 +59,14 @@ class YgFinder:
         # Pass dirs with problems, for example, without permissions to read
         try:
             folderNames = [name for name in os.listdir(searchPath) if os.path.isdir(os.path.join(searchPath, name))]
+
+            folders = []
+            for name in os.listdir(searchPath):
+                fso = YgFileSystemObject(name, searchPath)
+                if fso.isDir() and not fso.is_mar_ignore():
+                    folders.append(fso)
         except:
+            print("Exception of os.listdir in YgFinder.getSubfoldersV2()")
             return
 
         if len(folderNames) <= 0:
@@ -75,9 +82,39 @@ class YgFinder:
                     subfolders += tempSubfolders
         return subfolders
 
+    def get_subfolders(self, folder: YgFileSystemObject, is_recursive: bool) -> [YgFileSystemObject]:
+        # Проверка на директорию и отстуствию .marignore
+        if folder.is_mar_ignore():
+            return []
+
+        subfolders = []
+        # Pass dirs with problems, for example, without permissions to read
+        try:
+            for name in os.listdir(folder.fullName()):
+                fso = YgFileSystemObject(name, folder.path)
+                if fso.isDir() and not fso.is_mar_ignore() and name not in Constant.MAR_IGNORE_DIRECTORY_NAMES:
+                    subfolders.append(fso)
+        except:
+            print("Exception of os.listdir in YgFinder.getSubfoldersV2()")
+            return []
+
+        if len(subfolders) <= 0 and not is_recursive:
+            return subfolders
+
+        inner_subfolders = []
+        for subfolder in subfolders:
+            inners = self.get_subfolders(folder=subfolder, is_recursive=True)
+            if len(inners) > 0:
+                inner_subfolders += inners
+
+        return subfolders + inner_subfolders
+
+
     @spinner(msg="Elapsed time")
     def getAllFolders(self, curFolderPath):
         currentFolder = YgFileSystemObject(os.path.basename(curFolderPath), os.path.dirname(curFolderPath))
+        if currentFolder.is_mar_ignore():
+            return []
         allFolders = [currentFolder]
         subFolders = self.getSubfoldersV2(curFolderPath)
         if subFolders is not None:
@@ -350,4 +387,4 @@ class YgFinder:
         if delta.seconds > 0:
             print(Color().PURPLE + f"Execution time: {delta.seconds} sec(s)" + Color.ENDCOLOR)
         else:
-            print(Color().PURPLE + f"Execution time: {delta.microseconds} sec(s)" + Color.ENDCOLOR)
+            print(Color().PURPLE + f"Execution time: {delta.microseconds} microsec(s)" + Color.ENDCOLOR)

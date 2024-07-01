@@ -1,6 +1,8 @@
 class Constant:
     META_FILE_SUFFIX = ".mar.txt"
     MAR_DIRECTORY_NAME = "./.mar"
+    MAR_IGNORE_FILE_NAME = ".marignore"
+    MAR_IGNORE_DIRECTORY_NAMES = [".git", ".mar", "Trash"]
     TAGS_PATH_FILE_NAME = "./.mar/tags.path.mar.txt"
 
     # Поменять на MAR_DIRECTORY_NAME

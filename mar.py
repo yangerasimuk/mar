@@ -23,8 +23,8 @@ from legacy_color import *
 class Version:
     major = "0"
     minor = "2"
-    patch = "0"
-    build = "June 22, 2024"
+    patch = "1"
+    build = "July 1, 2024"
     author = "Yan Gerasimuk"
 
     def fullVersion(self):

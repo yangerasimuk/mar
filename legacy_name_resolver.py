@@ -1,5 +1,5 @@
 from legacy_file_system import *
-from legacy_index import *
+#from legacy_index import *
 from legacy_constant import *
 
 
@@ -7,7 +7,7 @@ class LegacyNameResolver:
 
 	def __init__(self, fileName):
 		self.fileSystem = LegacyFileSystem()
-		self.index = LegacyIndex()
+		#self.index = LegacyIndex()
 		self.fileName = fileName
 
 	def names(self):
