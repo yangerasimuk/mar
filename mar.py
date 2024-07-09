@@ -1,30 +1,14 @@
-#!/usr/bin/env python3
-
-import sys
-import os
-# import hashlib
-import pathlib
-
-from pathlib import Path
-from typing import List
 from urler import *
-from yg_file_system import *
-from yg_finder import *
 from legacy_folder import *
-from legacy_name_resolver import *
-from legacy_meta import *
-from legacy_index import *
 from legacy_meta_index import *
 from legacy_lister import *
 from yg_actor_viewer import *
-from legacy_constant import *
-from legacy_color import *
 
 class Version:
     major = "0"
-    minor = "2"
-    patch = "1"
-    build = "July 1, 2024"
+    minor = "3"
+    patch = "0"
+    build = "July 9, 2024"
     author = "Yan Gerasimuk"
 
     def fullVersion(self):
@@ -211,17 +195,23 @@ def listTag(argv):
         lister.printFilesRecurcive()
 
 
-def fast_scandir(dirname):
-    subfolders = [f.path for f in os.scandir(dirname) if f.is_dir()]
-    for dirname in list(subfolders):
-        subfolders.extend(fast_scandir(dirname))
-    return subfolders
+def view(argv):
+    print(argv)
+    terminal_path = ' '.join(argv)
+    print("Call " + terminal_path)
+
+    filesystem = YgFileSystem()
+    find = YgFinder(filesystem)
+    viewer = YgViewer()
+    if len(argv) == 3 and argv[2] in ("-r", "--recursive"):
+        viewer.view_with_finder(find, is_recursive=True)
+    else:
+        viewer.view_with_finder(find)
 
 
 def finder(argv):
-    print("finder(argv)")
-    for arg in argv:
-        print(arg)
+    terminal_path = ' '.join(argv)
+    print("Call " + terminal_path)
 
     option = argv[2]
     keys = []
@@ -236,24 +226,20 @@ def finder(argv):
             counter = counter + 1
 
     filesystem = YgFileSystem()
-    finder = YgFinder(filesystem)
+    find = YgFinder(filesystem)
 
-    if option == "-p" or option == "--print":
-        finder.print()
-    elif option == "-r" or option == "--print-recursive":
-        finder.printRecursive()
-    elif option == "-a" or option == "--add":
-        finder.addTags(keys)
+    if option == "-a" or option == "--add":
+        find.add_tags(keys)
     elif option == "-d" or option == "--delete":
-        finder.deleteTags(keys)
+        find.delete_tags(keys)
     elif option == "-e" or option == "--erase":
-        finder.eraseTags()
-    elif option == "-g" or option == "--goto":
-        hash = keys.pop()
-        finder.goToFolder(hash)
-    elif option == "-o" or option == "--open":
-        hash = keys.pop()
-        finder.openFile(hash)
+        find.erase_all_tags()
+    elif option == "-p" or option == "--print":
+        find.print(is_recursive=False)
+    elif option == "-pr" or option == "--print-recursive":
+        find.print(is_recursive=True)
+    else:
+        error(argv)
 
 
 def error(argv):
@@ -295,15 +281,11 @@ def main():
         urler = URLer(sys.argv)
         urler.start()
     elif firstArg == "view":
-        viewer = YgViewer()
-        viewer.print_help()
-        filesystem = YgFileSystem()
-        find = YgFinder(filesystem)
-        viewer.view_with_finder(find)
+        view(sys.argv)
     else:
         error(sys.argv)
 
 
-# Точка входа
+# Entry point
 if __name__ == "__main__":
     main()

@@ -22,6 +22,8 @@ def _spin(msg, start, frames, _stop_spin):
 
 
 def spinner(msg="Elapsed Time"):
+    # @spinner(msg="Elapsed time")
+    # def getAllFolders(self, curFolderPath):
     def decorator(func):
         @functools.wraps(func)
         def wrapper_decrorator(*args, **kwargs):
@@ -34,10 +36,10 @@ def spinner(msg="Elapsed Time"):
             except Exception as e:
                 exc_type, exc_value, exc_traceback = sys.exc_info()
                 stacktrace = traceback.extract_tb(exc_traceback)
-                logger.debug(
-                    "response {}".format(value))
-                logger.debug(sys.exc_info())
-                logger.debug(stacktrace)
+                # logger.debug(
+                #     "response {}".format(value))
+                # logger.debug(sys.exc_info())
+                # logger.debug(stacktrace)
                 raise
             finally:
                 stop = time()
