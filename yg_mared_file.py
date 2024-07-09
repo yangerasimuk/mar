@@ -6,11 +6,11 @@ import pathlib
 class YgMaredFile:
     def __init__(self, fso: YgFileSystemObject):
         self.file = fso
-        self.meta = LegacyMeta(self.file.fullName())
+        self.meta = LegacyMeta(self.file.full_name())
 
     def as_html(self) -> str:
-        path = self.file.fullName()
-        url = pathlib.Path(self.file.fullName()).as_uri()
+        path = self.file.full_name()
+        url = pathlib.Path(self.file.full_name()).as_uri()
         result = "<br />"
         result += "<hr />"
         result += "<br />"

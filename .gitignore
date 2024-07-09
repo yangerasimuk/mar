@@ -1,5 +1,4 @@
-./mar
-./.mar
-./.idea
-./install.sh
+.mar/
+.idea/
+install.sh
 __pycache__/

@@ -1,4 +1,5 @@
 import os
+from yg_file_system_object import *
 
 
 class YgFolder:
@@ -15,9 +16,6 @@ class YgFileSystem:
 	IGNORE_DIR_SUFFIX = [".xcassets", ".lproj", ".xcodeproj", ".xcworkspace"]
 	IGNORE_DIR_NAMES = [".git", ".mar", "__pycache__"]
 
-	def __init__(self):
-		print("Fs()")
-
 	def cur_folder(self):
 		cur_dir = os.curdir
 		# print(type(cur_dir))
@@ -25,7 +23,18 @@ class YgFileSystem:
 		# print("os.path.dirname():" + os.path.dirname(cur_dir))
 		# print("os.path.abspath(): " + os.path.abspath(cur_dir))
 		# return YgFolder(cur_dir)
-		return YgFolder(os.path.abspath(cur_dir))
+		# return YgFolder(os.path.abspath(cur_dir))
+
+		try:
+			abspath = os.path.abspath(cur_dir)
+			return YgFolder(abspath)
+		except PermissionError:
+			print("Error. Operation non permited.")
+			return None
+
+	def current_folder(self) -> YgFileSystemObject:
+		path, name = os.path.split(os.getcwd())
+		return YgFileSystemObject(name=name, path=path)
 
 	def fast_scandir(self, dirname):
 		subfolders= [f.path for f in os.scandir(dirname) if f.is_dir()]

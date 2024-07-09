@@ -13,10 +13,13 @@ cp legacy_meta.py ~/bin
 cp legacy_meta_index.py ~/bin
 cp legacy_name_resolver.py ~/bin
 
+
 cp yg_file_system.py ~/bin
 cp yg_file_system_object.py ~/bin
 cp yg_finder.py ~/bin
 cp yg_global_funcs.py ~/bin
+cp yg_file_system_iterator.py ~/bin
+cp yg_file_system_iterator_filter.py ~/bin
 
 cp yg_actor_viewer.py ~/bin
 cp yg_mared_file.py ~/bin
