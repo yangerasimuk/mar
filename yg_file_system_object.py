@@ -1,6 +1,5 @@
 import os
 import datetime
-from spinner import *
 from yg_file_system import *
 from legacy_constant import *
 
@@ -11,7 +10,7 @@ class YgFileSystemObject:
         self.path = path
 
     def __str__(self) -> str:
-        return f"fso: full_name: {self.full_name()}"
+        return f"FSO: {self.full_name()}"
 
     def full_name(self):
         return os.path.join(self.path, self.name)
@@ -30,15 +29,8 @@ class YgFileSystemObject:
         return os.path.isfile(self.full_name())
 
     def is_mar_ignore(self) -> bool:
-        # print("is_mar_ignored()...")
         mar_ignore_file = os.path.join(self.path, Constant.MAR_IGNORE_FILE_NAME)
-        # print(f"\t.marignore file: {mar_ignore_file}")
-        is_exist = os.path.isfile(mar_ignore_file)
-        # if #s_exist:
-            # print("\tis_mar_ignore == true")
-        # else:
-            # print("\tis_mar_ignore == false")
-        return is_exist
+        return os.path.isfile(mar_ignore_file)
 
     def has_files(self):
         if self.is_file():
@@ -55,18 +47,18 @@ class YgFileSystemObject:
     def get_files(self):
         if self.is_file():
             return False
-        fileNames = [name for name in os.listdir(self.full_name()) if
+        file_names = [name for name in os.listdir(self.full_name()) if
                      os.path.isfile(os.path.join(self.full_name(), name))]
-        objFiles = []
-        for fileName in fileNames:
-            objFile = YgFileSystemObject(fileName, self.full_name())
-            objFiles.append(objFile)
-        return objFiles
+        result_files = []
+        for file_name in file_names:
+            file = YgFileSystemObject(file_name, self.full_name())
+            result_files.append(file)
+        return result_files
 
     def created_datetime(self) -> datetime:
         stat = os.stat(self.full_name())
-        birthtime = stat.st_birthtime
-        birth = datetime.datetime.fromtimestamp(birthtime)
+        birth_time = stat.st_birthtime
+        birth = datetime.datetime.fromtimestamp(birth_time)
 
         # for "2018-10-08_12-55-25_20181008_125525.jpg" file name
         if len(self.name) >= 19:
@@ -86,7 +78,7 @@ class YgFileSystemObject:
             except:
                 pass
 
-        print(f"#3 birth: {birth}")
+        # print(f"#3 birth: {birth}")
         return birth
 
     def convert(self, date_time: str, format: str) -> datetime:
