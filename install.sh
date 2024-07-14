@@ -21,5 +21,11 @@ cp yg_global_funcs.py ~/bin
 cp yg_file_system_iterator.py ~/bin
 cp yg_file_system_iterator_filter.py ~/bin
 
+cp yg_actor.py ~/bin
 cp yg_actor_viewer.py ~/bin
+cp yg_actor_ads_cleaner.py ~/bin
 cp yg_mared_file.py ~/bin
+
+cp pyads.py ~/bin
+
+echo 'install complete'

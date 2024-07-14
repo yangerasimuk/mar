@@ -1,14 +1,17 @@
+import sys
+
 from urler import *
 from legacy_folder import *
 from legacy_meta_index import *
 from legacy_lister import *
 from yg_actor_viewer import *
+from yg_actor_ads_cleaner import *
 
 class Version:
     major = "0"
     minor = "3"
-    patch = "0"
-    build = "July 9, 2024"
+    patch = "1"
+    build = "July 14, 2024"
     author = "Yan Gerasimuk"
 
     def fullVersion(self):
@@ -209,6 +212,22 @@ def view(argv):
         viewer.view_with_finder(find)
 
 
+def ads_cleaner(argv):
+    print(argv)
+    terminal_path = ' '.join(argv)
+    print("Call " + terminal_path)
+
+    if not platform.startswith('win'):
+        print("Manipulating with ntfs streams (ADS) available only on windows platform.")
+        return
+
+    filesystem = YgFileSystem()
+    find = YgFinder(filesystem)
+    cleaner = YgActorADSCleaner()
+    files = find.files_with_filter(YgIteratorFilterADSFiles())
+    cleaner.clean(files=files)
+
+
 def finder(argv):
     terminal_path = ' '.join(argv)
     print("Call " + terminal_path)
@@ -282,6 +301,8 @@ def main():
         urler.start()
     elif firstArg == "view":
         view(sys.argv)
+    elif firstArg == "ads_cleaner":
+        ads_cleaner(sys.argv)
     else:
         error(sys.argv)
 

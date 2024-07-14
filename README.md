@@ -79,3 +79,6 @@ alias marFinderGo="python3 ~/bin/mar.py finder -g"
 # Открыть файл с хешем
 alias marFinderOpen="python3 ~/bin/mar.py finder -o"
 ```
+
+## Credits
+Thanks @RobinDavid for [pyADS](https://github.com/RobinDavid/pyADS)
