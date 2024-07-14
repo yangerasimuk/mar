@@ -1,6 +1,7 @@
 from yg_actor import *
 from yg_file_system_iterator_filter import *
 from legacy_color import *
+from legacy_constant import *
 from sys import platform
 if platform.startswith('win'):
     from pyads import *
@@ -51,3 +52,4 @@ class YgIteratorFilterADSFiles(YgFileSystemIteratorFilter):
             return False
 
         return True
+

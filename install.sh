@@ -25,6 +25,7 @@ cp yg_actor.py ~/bin
 cp yg_actor_viewer.py ~/bin
 cp yg_actor_ads_cleaner.py ~/bin
 cp yg_mared_file.py ~/bin
+cp yg_garbage_collector.py ~/bin
 
 cp pyads.py ~/bin
 
