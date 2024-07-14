@@ -60,6 +60,25 @@ class YgFinder:
         result.sort()
         return result
 
+    def files_with_filter(
+            self,
+            include_filter: YgFileSystemIteratorFilter,
+            is_recursive: bool = False
+    ) -> [YgFileSystemObject]:
+        current_folder = YgFileSystem().current_folder()
+        iterator = YgFileSystemIterator(
+            file_system=YgFileSystem(),
+            root_folder=current_folder
+        )
+
+        folders, files = iterator.iterate_without_spinner(
+            current_folder=current_folder,
+            include_filter=include_filter,
+            is_recursive=is_recursive
+        )
+
+        return files
+
     def mared_files(self, is_recursive: bool = False) -> [YgFileSystemObject]:
         current_folder = YgFileSystem().current_folder()
         iterator = YgFileSystemIterator(
