@@ -71,7 +71,7 @@ class YgFinder:
             root_folder=current_folder
         )
 
-        folders, files = iterator.iterate_without_spinner(
+        folders, files = iterator.iterate_with_spinner(
             current_folder=current_folder,
             include_filter=include_filter,
             is_recursive=is_recursive

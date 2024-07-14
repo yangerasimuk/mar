@@ -213,7 +213,6 @@ def view(argv):
 
 
 def ads_cleaner(argv):
-    print(argv)
     terminal_path = ' '.join(argv)
     print("Call " + terminal_path)
 
@@ -221,12 +220,31 @@ def ads_cleaner(argv):
         print("Manipulating with ntfs streams (ADS) available only on windows platform.")
         return
 
+    option = None
+    if len(argv) > 2:
+        option = argv[2]
+    else:
+        print("Command line error.")
+        return
+
     filesystem = YgFileSystem()
     find = YgFinder(filesystem)
     cleaner = YgActorADSCleaner()
-    files = find.files_with_filter(YgIteratorFilterADSFiles())
-    cleaner.clean(files=files)
 
+    if option == "-e" or option == "--erase":
+        files = find.files_with_filter(YgIteratorFilterADSFiles())
+        cleaner.erase(files=files)
+    elif option == "-er" or option == "--erase-recursive":
+        files = find.files_with_filter(YgIteratorFilterADSFiles(), is_recursive=True)
+        cleaner.erase(files=files)
+    elif option == "-p" or option == "--print":
+        files = find.files_with_filter(YgIteratorFilterADSFiles())
+        cleaner.print(files=files)
+    elif option == "-pr" or option == "--print-recursive":
+        files = find.files_with_filter(YgIteratorFilterADSFiles(), is_recursive=True)
+        cleaner.print(files=files)
+    else:
+        error(argv)
 
 def finder(argv):
     terminal_path = ' '.join(argv)
