@@ -71,3 +71,6 @@ class YgFileSystem:
 			subfolders = result
 
 		return subfolders
+
+	def remove_file(self, path):
+		os.remove(path)

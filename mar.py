@@ -6,6 +6,7 @@ from legacy_meta_index import *
 from legacy_lister import *
 from yg_actor_viewer import *
 from yg_actor_ads_cleaner import *
+from yg_garbage_collector import *
 
 class Version:
     major = "0"
@@ -211,6 +212,32 @@ def view(argv):
     else:
         viewer.view_with_finder(find)
 
+def garbage_collector(argv):
+    file_system = YgFileSystem()
+    find = YgFinder(filesystem=file_system)
+    garbage_collector = YgGarbageCollector(file_system=file_system)
+
+    option = None
+    if len(argv) > 2:
+        option = argv[2]
+    else:
+        print("Command line error.")
+        return
+
+    if option == "-e" or option == "--erase":
+        files = find.files_with_filter(YgIteratorFilterGarbageFiles())
+        garbage_collector.erase(files=files)
+    elif option == "-er" or option == "--erase-recursive":
+        files = find.files_with_filter(YgIteratorFilterGarbageFiles(), is_recursive=True)
+        garbage_collector.erase(files=files)
+    elif option == "-p" or option == "--print":
+        files = find.files_with_filter(YgIteratorFilterGarbageFiles())
+        garbage_collector.print(files=files)
+    elif option == "-pr" or option == "--print-recursive":
+        files = find.files_with_filter(YgIteratorFilterGarbageFiles(), is_recursive=True)
+        garbage_collector.print(files=files)
+    else:
+        error(argv)
 
 def ads_cleaner(argv):
     terminal_path = ' '.join(argv)
@@ -319,8 +346,10 @@ def main():
         urler.start()
     elif firstArg == "view":
         view(sys.argv)
-    elif firstArg == "ads_cleaner":
+    elif firstArg == "ads":
         ads_cleaner(sys.argv)
+    elif firstArg == "gc":
+        garbage_collector(sys.argv)
     else:
         error(sys.argv)
 
