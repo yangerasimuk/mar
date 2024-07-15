@@ -225,17 +225,17 @@ def garbage_collector(argv):
         return
 
     if option == "-e" or option == "--erase":
-        files = find.files_with_filter(YgIteratorFilterGarbageFiles())
-        garbage_collector.erase(files=files)
+        objects = find.files_with_filter(YgIteratorFilterGarbageFiles())
+        garbage_collector.erase(objects=objects)
     elif option == "-er" or option == "--erase-recursive":
-        files = find.files_with_filter(YgIteratorFilterGarbageFiles(), is_recursive=True)
-        garbage_collector.erase(files=files)
+        objects = find.files_with_filter(YgIteratorFilterGarbageFiles(), is_recursive=True)
+        garbage_collector.erase(objects=objects)
     elif option == "-p" or option == "--print":
-        files = find.files_with_filter(YgIteratorFilterGarbageFiles())
-        garbage_collector.print(files=files)
+        objects = find.files_with_filter(YgIteratorFilterGarbageFiles())
+        garbage_collector.print(objects=objects)
     elif option == "-pr" or option == "--print-recursive":
-        files = find.files_with_filter(YgIteratorFilterGarbageFiles(), is_recursive=True)
-        garbage_collector.print(files=files)
+        objects = find.files_with_filter(YgIteratorFilterGarbageFiles(), is_recursive=True)
+        garbage_collector.print(objects=objects)
     else:
         error(argv)
 

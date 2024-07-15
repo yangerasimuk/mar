@@ -7,25 +7,30 @@ class YgGarbageCollector:
     def __init__(self, file_system: YgFileSystem):
         self.file_system = file_system
 
-    def print(self, files: [YgFileSystemObject]):
+    def print(self, objects: [YgFileSystemObject]):
         print(Color().RED)
         print("Garbage files:")
-        for file in files:
-            print(f"\n{file.full_name()}")
+        for obj in objects:
+            print(f"\n{obj.full_name()}")
         print(Color.ENDCOLOR)
 
-    def erase(self, files: [YgFileSystemObject]):
+    def erase(self, objects: [YgFileSystemObject]):
         success_count = 0
         failure_count = 0
         print(Color().RED)
         print("Garbage collect...")
-        for file in files:
-            print(f"\n{file.full_name()}")
+        for obj in objects:
+            print(f"\n{obj.full_name()}")
             try:
-                self.file_system.remove_file(file.full_name())
+                if obj.is_dir():
+                    self.file_system.remove_folder(obj.full_name())
+                elif obj.is_file():
+                    self.file_system.remove_file(obj.full_name())
+                else:
+                    continue
                 success_count += 1
             except:
-                print("Error during remove file.")
+                print("Error during remove object.")
                 failure_count += 1
                 continue
         print(Color.ENDCOLOR)
@@ -57,6 +62,9 @@ class YgIteratorFilterGarbageFiles(YgFileSystemIteratorFilter):
             return True
 
         if file_system_object.is_file() and file_system_object.name.endswith("@SynoEAStream"):
+            return True
+
+        if file_system_object.is_file() and file_system_object.name.endswith("@tmp"):
             return True
 
         if file_system_object.is_file() and file_system_object.name.startswith("SYNOPHOTO_"):
