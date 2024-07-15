@@ -74,3 +74,6 @@ class YgFileSystem:
 
 	def remove_file(self, path):
 		os.remove(path)
+
+	def remove_folder(self, path: str):
+		os.rmdir(path=path)

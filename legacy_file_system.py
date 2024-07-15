@@ -36,7 +36,7 @@ class LegacyFileSystem:
         try:
             os.mkdir(path)
         except OSError:
-            print("Creation of the directory failed" & path)
+            print("Creation of the directory failed. Path: " + path)
 
     def checkDirectory(self, path):
         if self.isExistDirectory(path) == False:

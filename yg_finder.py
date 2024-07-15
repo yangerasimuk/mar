@@ -51,7 +51,7 @@ class YgFinder:
         if self.oldFileSystem.isExistFile(Constant.TAGS_PATH_FILE_NAME):
             self.oldFileSystem.removeFile(Constant.TAGS_PATH_FILE_NAME)
 
-    def tags_from_mared_files(self, mared_files: [YgFileSystemObject]) -> list[str]:
+    def tags_from_mared_files(self, mared_files: [YgFileSystemObject]) -> [str]:
         tags = set()
         for file in mared_files:
             meta = LegacyMeta(file.full_name())
@@ -158,7 +158,7 @@ class YgFinder:
             print("No selected tags.")
         print(Color.ENDCOLOR)
 
-    def print_tags_of_mared_files(self, include_tags: list[str], exclude_tags: list[str]):
+    def print_tags_of_mared_files(self, include_tags: [str], exclude_tags: [str]):
         print(Color().GREEN)
         if len(include_tags) > 0:
             selected = set()
