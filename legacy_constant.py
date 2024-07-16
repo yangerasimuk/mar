@@ -14,3 +14,6 @@ class Constant:
     SYSTEM_DIRECTORY_PREFIX = "."
     PYTHON_DIRECTORY_PREFIX = "_"
     SYSTEM_FILES = [".DS_Store", ".localized"]
+
+    # Messages
+    MESSAGE_NO_ADS_FILES = "No files with streams (NTFS ADS)"
