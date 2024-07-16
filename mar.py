@@ -4,6 +4,7 @@ from urler import *
 from legacy_folder import *
 from legacy_meta_index import *
 from legacy_lister import *
+from legacy_constant import *
 from yg_actor_viewer import *
 from yg_actor_ads_cleaner import *
 from yg_garbage_collector import *
@@ -260,18 +261,31 @@ def ads_cleaner(argv):
 
     if option == "-e" or option == "--erase":
         files = find.files_with_filter(YgIteratorFilterADSFiles())
-        cleaner.erase(files=files)
+        if len(files) == 0:
+            print(Color().GREEN + Constant.MESSAGE_NO_ADS_FILES + Color.ENDCOLOR)
+        else:
+            cleaner.erase(files=files)
     elif option == "-er" or option == "--erase-recursive":
         files = find.files_with_filter(YgIteratorFilterADSFiles(), is_recursive=True)
-        cleaner.erase(files=files)
+        if len(files) == 0:
+            print(Color().GREEN + Constant.MESSAGE_NO_ADS_FILES + Color.ENDCOLOR)
+        else:
+            cleaner.erase(files=files)
     elif option == "-p" or option == "--print":
         files = find.files_with_filter(YgIteratorFilterADSFiles())
-        cleaner.print(files=files)
+        if len(files) == 0:
+            print(Color().GREEN + Constant.MESSAGE_NO_ADS_FILES + Color.ENDCOLOR)
+        else:
+            cleaner.print(files=files)
     elif option == "-pr" or option == "--print-recursive":
         files = find.files_with_filter(YgIteratorFilterADSFiles(), is_recursive=True)
-        cleaner.print(files=files)
+        if len(files) == 0:
+            print(Color().GREEN + Constant.MESSAGE_NO_ADS_FILES + Color.ENDCOLOR)
+        else:
+            cleaner.print(files=files)
     else:
         error(argv)
+
 
 def finder(argv):
     terminal_path = ' '.join(argv)

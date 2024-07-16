@@ -19,6 +19,9 @@ class YgActorADSCleaner(YgActor):
                 print(stream)
 
     def erase(self, files: [YgFileSystemObject]):
+        if len(files) == 0:
+            return
+
         success_count = 0
         failure_files = []
         for file in files:
@@ -52,4 +55,3 @@ class YgIteratorFilterADSFiles(YgFileSystemIteratorFilter):
             return False
 
         return True
-
