@@ -14,7 +14,7 @@ class LegacyMetaIndex:
 
 		for fileName in self.index.listFiles():
 			meta = LegacyMeta(fileName)
-			meta.setTags(tags)
+			meta.set_tags(tags)
 
 	def addTags(self, tags):
 		if not self.index.isExistIndex():
@@ -23,7 +23,7 @@ class LegacyMetaIndex:
 
 		for fileName in self.index.listFiles():
 			meta = LegacyMeta(fileName)
-			meta.addTags(tags)
+			meta.add_tags(tags)
 
 	def deleteTags(self, tags):
 		if not self.index.isExistIndex():
