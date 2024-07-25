@@ -68,7 +68,7 @@ def tagIndex(argv):
 
 def tag(argv):
     option = argv[2]
-    print("Option: ", option)
+    # print("Option: ", option)
     file = argv[3]
     print("File: ", file)
 
@@ -81,9 +81,9 @@ def tag(argv):
     meta = LegacyMeta(file)
 
     if option == "-s" or option == "--set":
-        meta.setTags(tags)
+        meta.set_tags(tags)
     elif option == "-a" or option == "--add":
-        meta.addTags(tags)
+        meta.add_tags(tags)
     elif option == "-d" or option == "--delete":
         meta.deleteTags(tags)
     elif option == "-e" or option == "--erase":

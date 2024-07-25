@@ -9,11 +9,24 @@ class LegacyMeta:
         self.fileSystem = LegacyFileSystem()
         self.syncTags()
 
-    def setTags(self, tags):
+    def set_tags(self, tags):
+        if len(tags) == 0:
+            print("Can not set empty tags.")
+            return
+        if not self.fileSystem.isExistFile(self.fileName):
+            print("Target file is not exists.")
+            return
         self.tags = tags
         self.writeTags()
 
-    def addTags(self, tags):
+    def add_tags(self, tags):
+        if len(tags) == 0:
+            print("Can not set empty tags.")
+            return
+        if not self.fileSystem.isExistFile(self.fileName):
+            print("Target file is not exists.")
+            return
+
         self.tags = self.tags + tags
         self.writeTags()
 
