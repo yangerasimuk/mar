@@ -9,6 +9,9 @@ from yg_actor_viewer import *
 from yg_actor_ads_cleaner import *
 from yg_garbage_collector import *
 
+from yg_tag import *
+from uuid import *
+
 class Version:
     major = "0"
     minor = "3"
@@ -85,9 +88,9 @@ def tag(argv):
     elif option == "-a" or option == "--add":
         meta.add_tags(tags)
     elif option == "-d" or option == "--delete":
-        meta.deleteTags(tags)
+        meta.delete_tags(tags)
     elif option == "-e" or option == "--erase":
-        meta.eraseTags()
+        meta.erase_tags()
     elif option == "-p" or option == "--print":
         meta.printTags()
 
@@ -212,6 +215,8 @@ def view(argv):
         viewer.view_with_finder(find, is_recursive=True)
     else:
         viewer.view_with_finder(find)
+
+    print(filesystem.desktop_folder())
 
 def garbage_collector(argv):
     file_system = YgFileSystem()
