@@ -17,3 +17,6 @@ class Constant:
 
     # Messages
     MESSAGE_NO_ADS_FILES = "No files with streams (NTFS ADS)"
+
+    # KVO tags
+    TAG_KEY_SYSTEM_UUID = "uuid"
