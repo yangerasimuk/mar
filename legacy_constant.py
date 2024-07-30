@@ -20,3 +20,4 @@ class Constant:
 
     # KVO tags
     TAG_KEY_SYSTEM_UUID = "uuid"
+    FINDER_PRINT_TAG_HIDDEN_KEYS = ["uuid"]

@@ -301,7 +301,7 @@ def finder(argv):
 
     if len(argv) > 2:
         option = argv[2]
-        print("Option: ", option)
+        # print("Option: ", option)
         counter = 3
         while counter < len(argv):
             key = argv[counter]
