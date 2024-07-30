@@ -119,8 +119,8 @@ class YgFinder:
         else:
             include_filter = YgIteratorFilterMarFiles()
 
-        print("")
-        print("Folder tree walk...")
+        # print("")
+        # print("Folder tree walk...")
         folders, mared_files = iterator.iterate_with_spinner(
             current_folder=current_folder,
             include_filter=include_filter,
@@ -150,7 +150,7 @@ class YgFinder:
 
     def print_selected_tags(self):
         print(Color().GREEN)
-        print("")
+        # print("")
         if len(self.tags_in_path) > 0:
             print("Selected tags:")
             print(self.tags_in_path)
@@ -163,8 +163,14 @@ class YgFinder:
         if len(include_tags) > 0:
             selected = set()
             for tag in include_tags:
-                if tag not in exclude_tags:
-                    selected.add(tag)
+                if tag in exclude_tags:
+                    continue
+                obj_tag = YgTag(string=tag)
+                key = obj_tag.key_if_kvo()
+                if key is not None:
+                    if key in Constant.FINDER_PRINT_TAG_HIDDEN_KEYS:
+                        continue
+                selected.add(tag)
             result = list(selected)
             result.sort()
             print("Available tags:")
