@@ -27,6 +27,7 @@ cp yg_actor_ads_cleaner.py ~/bin
 cp yg_mared_file.py ~/bin
 cp yg_garbage_collector.py ~/bin
 cp yg_tag.py ~/bin
+cp yg_datetime.py ~/bin
 
 cp pyads.py ~/bin
 

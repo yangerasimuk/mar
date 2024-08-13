@@ -77,3 +77,23 @@ class YgFileSystem:
 
 	def remove_folder(self, path: str):
 		os.rmdir(path=path)
+
+	def is_exist_file(self, file_name: str) -> bool:
+		if os.path.isfile(file_name):
+			return True
+		else:
+			return False
+
+	def file_system_object(self, file_name: str):
+		"""
+		File object from full name.
+		:param file_name: full name of file system object
+		:return: None or YgFileSystemObject
+		"""
+		if not self.is_exist_file(file_name=file_name):
+			return None
+
+		name = os.path.basename(file_name)
+		path = os.path.dirname(file_name)
+		return YgFileSystemObject(name=name, path=path)
+
