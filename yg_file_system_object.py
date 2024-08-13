@@ -1,6 +1,5 @@
 import os
-import datetime
-from yg_file_system import *
+from datetime import datetime as dt, timezone as tz
 from legacy_constant import *
 
 
@@ -55,16 +54,16 @@ class YgFileSystemObject:
             result_files.append(file)
         return result_files
 
-    def created_datetime(self) -> datetime:
+    def created_datetime(self) -> dt:
         stat = os.stat(self.full_name())
         birth_time = stat.st_birthtime
-        birth = datetime.datetime.fromtimestamp(birth_time)
+        birth = dt.fromtimestamp(birth_time)
 
         # for "2018-10-08_12-55-25_20181008_125525.jpg" file name
         if len(self.name) >= 19:
             name = self.name[:19]
             try:
-                result = self.convert(date_time=name, format='%Y-%m-%d_%H-%M-%S')
+                result = self.convert(date_time=name, date_format='%Y-%m-%d_%H-%M-%S')
                 return result
             except:
                 pass
@@ -73,7 +72,7 @@ class YgFileSystemObject:
         if len(self.name) >= 10:
             name = self.name[:10]
             try:
-                result = self.convert(date_time=name, format='%Y-%m-%d')
+                result = self.convert(date_time=name, date_format='%Y-%m-%d')
                 return result
             except:
                 pass
@@ -81,5 +80,48 @@ class YgFileSystemObject:
         # print(f"#3 birth: {birth}")
         return birth
 
-    def convert(self, date_time: str, format: str) -> datetime:
-        return datetime.datetime.strptime(date_time, format)
+    def created_timestamp(self) -> dt:
+        stat = os.stat(self.full_name())
+        birth = dt.fromtimestamp(stat.st_birthtime, tz=dt.now().astimezone().tzinfo)
+
+        # for "2018-10-08_12-55-25_20181008_125525.jpg" file name
+        if len(self.name) >= 19:
+            name = self.name[:19]
+            try:
+                result = self.convert(date_time=name, date_format='%Y-%m-%d_%H-%M-%S')
+                diff = birth - result
+
+                # if diff between file system and file name is less than 1 day - use system one
+                if diff.days > 1:
+                    return result
+            except:
+                pass
+
+        # for "2021-08-31, Order HT.pdf" file name
+        if len(self.name) >= 10:
+            name = self.name[:10]
+            try:
+                result = self.convert(
+                    date_time=name,
+                    date_format='%Y-%m-%d',
+                    time_zone=tz.utc
+                )
+                diff = birth - result
+
+                # if diff between file system and file name is less than 1 day - use system one
+                if diff.days > 1:
+                    return result
+            except:
+                pass
+
+        return birth
+
+    def convert(self, date_time: str, date_format: str, time_zone: dt.tzinfo = None) -> dt:
+        result = dt.strptime(date_time, date_format)
+
+        if time_zone:
+            result = result.replace(tzinfo=time_zone)
+        else:
+            result = result.replace(tzinfo=dt.now().astimezone().tzinfo)
+
+        return result

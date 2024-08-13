@@ -1,6 +1,10 @@
 import uuid
 from legacy_file_system import *
 from yg_tag import *
+from yg_file_system_object import *
+from yg_file_system import *
+from yg_datetime import *
+
 
 class LegacyMeta:
 
@@ -26,19 +30,30 @@ class LegacyMeta:
 
         # save all kvo tags
         kvo_tags = []
-        is_identifiable = False
+        is_identifiable_by_uuid = False
+        is_identifiable_by_created = False
         for tag in self.tags:
             target = YgTag(string=tag)
             if target.is_key_value():
                 kvo_tags.append(str(target))
-                if target.identifiable_by_uuid():
-                    is_identifiable = True
+                if target.is_identifiable_by(key=Constant.TAG_KEY_SYSTEM_UUID):
+                    is_identifiable_by_uuid = True
+                if target.is_identifiable_by(key=Constant.TAG_KEY_SYSTEM_SOURCE_CREATED_DATETIME):
+                    is_identifiable_by_created = True
 
         # if meta is not identifiable by uuid, add one
-        if not is_identifiable:
+        if not is_identifiable_by_uuid:
             string = "[" + Constant.TAG_KEY_SYSTEM_UUID + "]:" + str(uuid.uuid4())
             uuid_tag = YgTag(string=string)
             kvo_tags.append(str(uuid_tag))
+
+        # if meta is not identifiable by created datetime, add one
+        if not is_identifiable_by_created:
+            obj = YgFileSystem().file_system_object(file_name=self.fileName)
+            timestamp = YgDatetime(datetime=obj.created_timestamp())
+            string = "[" + Constant.TAG_KEY_SYSTEM_SOURCE_CREATED_DATETIME + "]:" + str(timestamp)
+            timestamp_tag = YgTag(string=string)
+            kvo_tags.append(str(timestamp_tag))
 
         # prepare income tags
         income_tags = []
@@ -57,24 +72,42 @@ class LegacyMeta:
             print("Target file is not exists.")
             return
 
-        # check is identifiable
-        is_identifiable = False
+        kvo_tags = []
+        common_tags = []
+        is_identifiable_by_uuid = False
+        is_identifiable_by_created = False
         for tag in self.tags:
             target = YgTag(string=tag)
-            if target.identifiable_by_uuid():
-                is_identifiable = True
+            if target.is_key_value():
+                kvo_tags.append(str(target))
+                if target.is_identifiable_by(key=Constant.TAG_KEY_SYSTEM_UUID):
+                    is_identifiable_by_uuid = True
+                if target.is_identifiable_by(key=Constant.TAG_KEY_SYSTEM_SOURCE_CREATED_DATETIME):
+                    is_identifiable_by_created = True
+            else:
+                common_tags.append(str(target))
 
         # if meta is not identifiable by uuid, add one
-        if not is_identifiable:
+        if not is_identifiable_by_uuid:
             string = "[" + Constant.TAG_KEY_SYSTEM_UUID + "]:" + str(uuid.uuid4())
             uuid_tag = YgTag(string=string)
-            self.add_tag(uuid_tag)
+            kvo_tags.append(str(uuid_tag))
 
-        # add tags
-        for el in tags:
-            my_tag = YgTag(string=el)
-            self.add_tag(my_tag)
+        # if meta is not identifiable by created datetime, add one
+        if not is_identifiable_by_created:
+            obj = YgFileSystem().file_system_object(file_name=self.fileName)
+            timestamp = YgDatetime(datetime=obj.created_timestamp())
+            string = "[" + Constant.TAG_KEY_SYSTEM_SOURCE_CREATED_DATETIME + "]:" + str(timestamp)
+            timestamp_tag = YgTag(string=string)
+            kvo_tags.append(str(timestamp_tag))
 
+        # prepare income tags
+        income_tags = []
+        for source in tags:
+            target = YgTag(string=source)
+            income_tags.append(str(target))
+
+        self.tags = common_tags + kvo_tags + income_tags
         self.write_tags()
 
     def delete_tag(self, tag: YgTag, needs_write_to_storage: bool = False):
@@ -130,6 +163,8 @@ class LegacyMeta:
             return
         # remove duplicates
         self.tags = list(set(self.tags))
+        # make timestamp
+        self.set_kvo_tag(key=Constant.TAG_KEY_SYSTEM_META_MODIFIED_DATETIME, value=str(YgDatetime()))
         # sort
         self.tags.sort()
         # write
@@ -140,6 +175,22 @@ class LegacyMeta:
     def readTags(self):
         return self.fileSystem.readLinesFile(self.metaFileName)
 
+    def set_kvo_tag(self, key: str, value: str, needs_write_to_storage: bool = False):
+        result_tags = []
+        prefix = "[" + key + "]:"
+        for source_tag in self.tags:
+            if not source_tag.startswith(prefix):
+                result_tags.append(source_tag)
+
+        string = "[" + key + "]:" + value
+        tag = YgTag(string=string)
+        result_tags.append(str(tag))
+
+        self.tags = result_tags
+
+        if needs_write_to_storage:
+            self.write_tags()
+
     def add_tag(self, tag: YgTag, needs_write_to_storage: bool = False):
         key = tag.key_if_kvo()
         if key:
@@ -149,7 +200,7 @@ class LegacyMeta:
                 if not source_tag.startswith(prefix):
                     result_tags.append(source_tag)
             result_tags.append(str(tag))
-            self.tags = result_tags #.append(str(tag))
+            self.tags = result_tags
         else:
             string_tag = str(tag)
             is_exists = False

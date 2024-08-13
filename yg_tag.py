@@ -43,12 +43,12 @@ class YgTag:
         except ValueError:
             return None
 
-    def identifiable_by_uuid(self) -> bool:
+    def is_identifiable_by(self, key: str) -> bool:
         if not self.is_key_value():
             return False
 
-        key = self.key_if_kvo()
-        if not key or key != Constant.TAG_KEY_SYSTEM_UUID:
+        inner_key = self.key_if_kvo()
+        if not inner_key or inner_key != key:
             return False
 
         return True
