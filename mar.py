@@ -14,9 +14,9 @@ from uuid import *
 
 class Version:
     major = "0"
-    minor = "3"
+    minor = "4"
     patch = "1"
-    build = "July 14, 2024"
+    build = "August 14, 2024"
     author = "Yan Gerasimuk"
 
     def fullVersion(self):

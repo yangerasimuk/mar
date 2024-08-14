@@ -1,9 +1,12 @@
 import datetime as dt
 from legacy_constant import *
+from typing import Union
 
 
 class YgDatetime:
-    def __init__(self, datetime: dt.datetime | str = None):
+    # TODO: Change __init__ after python version up to 3.10
+    # def __init__(self, datetime: dt.datetime | str = None):
+    def __init_(self, datetime: Union[dt.datetime, str, None] = None):
         if isinstance(datetime, dt.datetime):
             self.stamp = datetime
         elif isinstance(datetime, str):
